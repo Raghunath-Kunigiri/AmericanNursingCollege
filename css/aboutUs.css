@@ -1,0 +1,75 @@
+body {
+    background-color: mintcream;
+}
+
+p {
+    text-align: justify;
+}
+
+.d-block {
+    max-height: 700px;
+}
+
+.coll_name {
+    background-color: rgb(231, 237, 243);
+    opacity: 0.7;
+}
+
+.coll_name h1 {
+    border-bottom: 5px solid rgb(3, 5, 5);
+}
+
+
+/* Transparent navbar */
+
+.navbar {
+    background-color: transparent !important;
+    z-index: 10;
+    /* Ensure navbar is above the carousel */
+}
+
+.navbar-brand img {
+    filter: brightness(0) invert(1);
+    /* Make logo white */
+}
+
+
+/* For dropdown menus */
+
+.navbar .dropdown-menu {
+    background-color: rgba(243, 241, 241, 0.8);
+    /* Semi-transparent background for dropdown */
+}
+
+.navbar .dropdown-item {
+    color: rgb(7, 7, 7);
+}
+
+.navbar .dropdown-item:hover {
+    background-color: rgb(11, 1, 1);
+    color: black;
+}
+
+.custom-navbar {
+    background-color: rgb(0, 0, 0);
+}
+
+.footer {
+    background-color: #0c2328;
+    color: #09090b;
+    text-align: center;
+    height: 60px;
+    padding: 15px 0px 0px 0px;
+}
+
+#aboutCollege {
+    /* background-color: aqua; */
+    background-image: url('../images/building_4.jpg');
+    background-repeat: no-repeat;
+    height: auto;
+    color: #2F323A;
+}
+
+.messageAU {
+    border: none;
+}
