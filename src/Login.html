@@ -4,10 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="/css/Login.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login.css') }}">
     <video autoplay muted loop>
-        <source src="/Videos/Login2.mp4" type="video/mp4">
-    </video>
+    <source src="{{ url_for('static', filename='Videos/Login2.mp4') }}" type="video/mp4">
+</video>
+
     <title>Sign Up / Login</title>
 </head>
 
@@ -50,6 +51,8 @@
                 <div class="container-button">
                     <button class="btn" id="reset-password-btn">Submit</button>
                     <button class="btn toggle-btn" id="toggle-btn-back-login">Login</button>
+                    <!-- Redirect to Index.html page  -->
+
                 </div>
             </div>
         </div>
@@ -112,6 +115,30 @@
                     alert(data.message);
                 });
         });
+        document.getElementById('login-btn').addEventListener('click', function() {
+            const email = document.querySelector('.login-form .username-input').value;
+            const password = document.querySelector('.login-form .password-input').value;
+
+            fetch('/login_user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === 'Login successful') {
+                        window.location.href = '/index.html'; // Redirect to index.html
+                    } else {
+                        alert(data.message);
+                    }
+                });
+        });
+
 
         // Similar AJAX calls can be made for login and forgot password
     </script>
