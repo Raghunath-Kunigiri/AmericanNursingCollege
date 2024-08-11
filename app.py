@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 # MongoDB connection
 client = MongoClient("mongodb+srv://kunigiriraghunath9493:Kunimango@1998@cluster0.ckryr.mongodb.net/")
-db = client['your_database_name']  # Replace with your database name
+db = client['kunigiriraghunath9493']  # Replace with your database name
 users_collection = db['users']  # Collection for storing user information
 
 # Home Route
