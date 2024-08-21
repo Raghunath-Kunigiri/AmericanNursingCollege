@@ -59,3 +59,67 @@ def forgot_password():
         return jsonify({'message': 'Password reset successful'}), 200
     else:
         return jsonify({'message': 'User not found'}), 404
+
+# @app.route('/forgot_password', methods=['POST'])
+# def forgot_password():
+#         data = request.get_json()
+#         email = data.get('email')  # Extract email from JSON data
+
+#         if not email:
+#             return jsonify({"error": "Email is required"}), 400
+
+#         user = db.users.find_one({"email": email})
+#         if not user:
+#             return jsonify({"error": "User not found"}), 404
+
+#         # Generate a unique token
+#         token = str(uuid.uuid4())
+#         reset_link = f"http://127.0.0.1:5000/reset_password/{token}"
+
+#         # Save the token in the database
+#         db.password_resets.update_one(
+#             {"email": email},
+#             {"$set": {"token": token}},
+#             upsert=True
+#         )
+
+#         subject = "Password Reset Request"
+#         body = f"Click the link to reset your password: {reset_link}"
+        
+#         try:
+#             send_email(subject, body, email)
+#             return jsonify({"message": "Password reset email sent"}), 200
+#         except Exception as e:
+#             return jsonify({"error": str(e)}), 500
+
+# @app.route('/reset_password/<token>', methods=['GET', 'POST'])
+# def reset_password(token):
+#         if request.method == 'POST':
+#             data = request.get_json()
+#             new_password = data.get('password')
+
+#             if not new_password:
+#                 return jsonify({"error": "Password is required"}), 400
+
+#             reset_entry = db.password_resets.find_one({"token": token})
+
+#             if not reset_entry:
+#                 return jsonify({"error": "Invalid or expired token"}), 400
+
+#             email = reset_entry['email']
+#             hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+
+#             # Update the user's password
+#             db.users.update_one(
+#                 {"email": email},
+#                 {"$set": {"password": hashed_password}}
+#             )
+
+#             # Remove the token entry after successful password reset
+#             db.password_resets.delete_one({"token": token})
+
+#             return jsonify({"message": "Password has been reset successfully"}), 200
+
+#         return render_template('reset_password.html', token=token)
+
+   

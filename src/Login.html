@@ -9,19 +9,18 @@
     <source src="{{ url_for('static', filename='Videos/Login2.mp4') }}" type="video/mp4">
 </video>
 
-    <title>Sign Up / Login</title>
+    <title>ACN</title>
 </head>
 
 <body>
     <div class="container">
         <div class="card">
             <div class="form-card sign-up-form" id="sign-up-form">
-                <h1 class="login-heading" id="form-heading">Sign Up</h1>
+                <h1 class="signup-heading" id="form-heading">Sign Up</h1>
                 <div class="input-wrapper">
                     <input class="username-input" type="text" placeholder="Username">
                     <input class="email-input" type="text" placeholder="Email">
                     <input class="password-input" type="password" placeholder="Password">
-                    <input class="confirm-password-input" type="password" placeholder="Confirm Password">
                 </div>
                 <div class="container-button">
                     <button class="btn" id="sign-up-btn">Sign Up</button>
@@ -32,7 +31,7 @@
             <div class="form-card login-form" id="login-form" style="display: none;">
                 <h1 class="login-heading" id="form-heading">Login</h1>
                 <div class="input-wrapper">
-                    <input class="username-input" type="text" placeholder="Username">
+                    <input class="email-input" type="text" placeholder="Email">
                     <input class="password-input" type="password" placeholder="Password">
                 </div>
                 <div class="container-button">
@@ -43,13 +42,12 @@
             </div>
 
             <div class="form-card forgot-password-form" id="forgot-password-form" style="display: none;">
-                <h1 class="login-heading" id="form-heading">Reset Password</h1>
+                <h1 class="forgot-heading" id="form-heading">Forgot Password</h1>
                 <div class="input-wrapper">
-                    <input class="password-input" type="password" placeholder="New Password">
-                    <input class="confirm-password-input" type="password" placeholder="Confirm Password">
+                    <input class="email-input" type="email" placeholder="Email">
                 </div>
                 <div class="container-button">
-                    <button class="btn" id="reset-password-btn">Submit</button>
+                    <button class="btn" id="Forgot-password-btn">Submit</button>
                     <button class="btn toggle-btn" id="toggle-btn-back-login">Login</button>
                     <!-- Redirect to Index.html page  -->
 
@@ -113,6 +111,7 @@
                 .then(response => response.json())
                 .then(data => {
                     alert(data.message);
+
                 });
         });
         document.getElementById('login-btn').addEventListener('click', function() {
