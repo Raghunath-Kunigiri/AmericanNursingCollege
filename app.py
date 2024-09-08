@@ -3,8 +3,6 @@ import os
 from dotenv import load_dotenv
 from flask import Flask
 from pymongo import MongoClient, errors
-from werkzeug.security import generate_password_hash, check_password_hash
-
 load_dotenv()
 
 app = Flask(__name__, template_folder='src')# MongoDB connection

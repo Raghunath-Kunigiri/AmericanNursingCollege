@@ -1,5 +1,5 @@
 body {
-    background-color: rgb(242, 244, 244);
+    background-color: rgb(241, 244, 244);
 }
 
 p {
@@ -22,22 +22,50 @@ p {
 /* Transparent navbar */
 
 .navbar {
-    background-color: transparent !important;
-    z-index: 10;
-    /* Ensure navbar is above the carousel */
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    z-index: 1030;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-nav .nav-item {
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-nav .nav-link {
+    padding: 1rem 1rem;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand,
+.navbar-nav .nav-link {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-nav {
+    display: flex;
+    gap: 10px;
+    /* Adds space between navbar items */
 }
 
 
 /* Navigation links */
 
 .navbar-nav .nav-link {
-    color: #090606;
+    color: #ffffff;
     /* Default color for navigation links */
+    padding: 0.5rem 1rem;
 }
 
 .navbar-nav .nav-link:hover {
-    color: #0c0c0c;
+    color: #f8f9fa;
     /* Color when hovering over navigation links */
+    text-decoration: underline;
 }
 
 
@@ -49,15 +77,15 @@ p {
 }
 
 .navbar-brand img {
-    filter: brightness(0) invert(1);
-    /* Make logo white */
+    filter: none;
+    /* Or adjust the filter to achieve the desired effect */
 }
 
 
 /* For dropdown menus */
 
 .navbar .dropdown-menu {
-    background-color: rgba(245, 245, 245, 0.8);
+    background-color: rgba(7, 6, 6, 0.8);
     /* Semi-transparent background for dropdown */
 }
 
