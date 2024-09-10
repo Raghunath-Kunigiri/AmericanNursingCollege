@@ -1,5 +1,15 @@
 body {
     background-color: rgb(241, 244, 244);
+    font-family: Arial, sans-serif;
+    color: #333;
+    line-height: 1.6;
+}
+
+.messageAU:hover {
+    transform: scale(1.05);
+    /* Slightly scale up */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    /* Add shadow on hover */
 }
 
 p {
@@ -11,7 +21,7 @@ p {
     color: #09090b;
     text-align: center;
     height: 60px;
-    padding: 15px 0px 0px 0px;
+    padding: 15px 0px;
 }
 
 .d-block {
@@ -78,7 +88,7 @@ p {
 
 .navbar-brand img {
     filter: none;
-    /* Or adjust the filter to achieve the desired effect */
+    /* No filter on logo image */
 }
 
 
@@ -98,32 +108,40 @@ p {
     color: black;
 }
 
-.custom-navbar {
-    background-color: rgb(236, 228, 228);
+.card {
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.text-light :hover {
+    color: #ffc107;
+}
+
+.nav-link:hover {
+    color: #ffc107;
+    /* Change navigation link color on hover */
+}
+
+
+/* About College Section */
+
 #aboutCollege {
-    /* background-color: aqua; */
     background-image: url('../images/About_us.jpg');
     background-repeat: no-repeat;
+    background-size: cover;
+    /* Ensure it covers completely */
     height: auto;
     color: #2F323A;
 }
 
-#photoGallery {
-    max-width: 300px;
-    background-color: mintcream;
-    border: none;
-    padding: 5 px;
-}
 
-img {
-    max-width: 100%;
-}
+/* Gallery Styles */
 
 .gallery img {
-    background-color: #09f51c;
-    padding: 1px;
     width: 100%;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
     cursor: pointer;
@@ -131,4 +149,54 @@ img {
 
 #gallery-modal .modal-img {
     width: 100%;
+}
+
+.gallery {
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.gallery:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.gallery-item {
+    transition: transform 0.3s, box-shadow 0.3s;
+    /* Applies transition effects */
+}
+
+.gallery-item:hover {
+    transform: scale(1.05);
+    /* Enlarge the image slightly on hover */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    /* Add shadow on hover */
+}
+
+
+/* Custom Button Styles */
+
+.btn-custom {
+    background-color: #28a745;
+    /* Green */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.btn-custom:hover {
+    background-color: #218838;
+    /* Darker Green on hover */
+    transform: translateY(-2px);
+    /* Lift button on hover */
+}
+
+
+/* Text Gradient */
+
+.text-gradient {
+    background: linear-gradient(90deg, #ffc107, #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }

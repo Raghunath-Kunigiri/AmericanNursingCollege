@@ -14,6 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+
 </head>
 
 <body>
@@ -22,45 +23,44 @@
     <nav class="navbar navbar-expand-sm navbar-dark fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.html">
-                <img src="{{ url_for('static', filename='images/ACN LOGO.png') }}" style="width:50px;" class="rounded-pill mt-2">ANC
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
-                    <span class="navbar-toggler-icon"></span>
+                <img src="{{ url_for('static', filename='images/ACN LOGO.png') }}" style="width:50px;" class="rounded-pill mt-2">ANC</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
+                <span class="navbar-toggler-icon"></span>
             </button>
-                <div class="collapse navbar-collapse justify-content-end" id="mynavbar">
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link text-light" href="index.html">HOME</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" href="{{ url_for('apply') }}">APPLY</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" href="{{ url_for('about_us') }}">ABOUT US</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-light" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                ACADEMIC
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="nav-link text-light" href="{{ url_for('course') }}">COURSE</a></li>
-                                <li><a class="nav-link text-light" href="{{ url_for('faculties') }}">FACULTIES</a></li>
-                                <li><a class="nav-link text-light" href="{{ url_for('residence') }}">RESIDENCE</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" href="{{ url_for('admission') }}">ADMISSION</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" href="{{ url_for('gallery') }}">GALLERY</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" href="{{ url_for('contact') }}">CONTACT</a>
-                        </li>
-                    </ul>
-                </div>
+            <div class="collapse navbar-collapse justify-content-end" id="mynavbar">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="index.html">HOME</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="{{ url_for('apply') }}">APPLY</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="{{ url_for('about_us') }}">ABOUT US</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-light" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            ACADEMIC
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="nav-link text-light" href="{{ url_for('course') }}">COURSE</a></li>
+                            <li><a class="nav-link text-light" href="{{ url_for('faculties') }}">FACULTIES</a></li>
+                            <li><a class="nav-link text-light" href="{{ url_for('residence') }}">RESIDENCE</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="{{ url_for('admission') }}">ADMISSION</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="{{ url_for('gallery') }}">GALLERY</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="{{ url_for('contact') }}">CONTACT</a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
-
 
     <!--------------------------------------- Carousel --------------------------------------->
     <div id="carousel_index" class="carousel slide carousel-fade w3-animate-opacity" data-bs-ride="carousel">
@@ -107,7 +107,6 @@
     </div>
 
     <!--------------------------------------- About College --------------------------------------->
-
     <div class="container-fluid">
         <div class="container">
             <hr class="border-2 border-top border-success">
@@ -115,7 +114,7 @@
             <hr class="border-2 border-top border-success">
             <div class="row">
                 <div class="col-md-6 my-3" id="aboutCollege">
-                    <img src="static/images/ACN LOGO.png" style="width:150px;" class="rounded-pill mt-5">
+                    <img src="{{ url_for('static', filename='images/ACN LOGO.png') }}" style="width:150px;" class="rounded-pill mt-5">
                     <h4>American College Of Nursing</h4>
                     <p><small> <b>KLD Road, Anantapur, Andhra Pradesh</b></small></p>
                 </div>
@@ -138,219 +137,166 @@
         <div class="row">
             <div class="col-sm-6.5">
                 <div class="card mt-5 shadow-lg border-success">
-                    <div class="card-header border-success">
-                        <h3 class="text-success">Bachelor of Science in Nursing (BSc Nursing)</h3>
-                    </div>
-                    <div class="card-body">
-                        <p>The Bachelor of Science in Nursing (BSc Nursing) program aims to equip students with a comprehensive understanding of nursing theory and practice while developing critical thinking, leadership, and communication skills. Emphasizing
-                            evidence-based care and cultural competence, the program prepares graduates to deliver high-quality patient care across diverse healthcare settings. With a focus on ethical practice and lifelong learning, BSc Nursing graduates
-                            are poised to address evolving healthcare needs, advocate for patients' rights, and contribute positively to the healthcare system.</p>
-                        <a href="course.html" class="btn btn-outline-success">Learn More</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-sm-6.5">
-                <div class="card mt-5 shadow-lg border-success">
-                    <div class="card-header border-success">
-                        <h3 class="text-success">General Nursing and Midwifery (GNM) </h3>
-                    </div>
-                    <div class="card-body">
-                        <p>The purpose of GNM nursing courses is to equip students with essential skills needed for diverse healthcare roles, including patient care, medication administration, and medical equipment management. Through practical training
-                            and theoretical knowledge, GNM programs prepare individuals to meet the evolving demands of the healthcare sector, ensuring quality care delivery and contributing positively to societal well-being.</p>
-                        <a href="course.html" class="btn btn-outline-success">Learn More</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- <div class="row">
-            <div class="col-sm-6.5">
-                <div class="card mt-5 shadow-lg border-success">
-                    <div class="card-header border-success">
-                        <h3 class="text-success">Diploma in Nursing Science and Midwifery</h3>
-                    </div>
-                    <div class="card-body">
-                        <p>The institutional goal of Diploma in Nursing Science and Midwifery program is to produce competent nurses that will enable them for demonstrate the competency of using knowledge-based practice for provision of quality holistic
-                            client centered nursing care to meet the needs/expectations and to promote, maintain, and restore heath of individuals, families, and communities Americanly and interAmericanly.</p>
-                        <a href="course.html" class="btn btn-outline-success">Learn More</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-sm-6.5">
-                <div class="card mt-5 shadow-lg border-success">
-                    <div class="card-header border-success">
-                        <h3 class="text-success">Diploma in Midwifery</h3>
-                    </div>
-                    <div class="card-body">
-                        <p>The B.Sc. in Post Basic Nursing course consists of two years and designed for registered nurses who completed Diploma in Nursing and Diploma in Midwifery / Orthopedics Nursing / Psychiatric Nursing and who completed Diploma in
-                            Nursing Science and Midwifery course.</p>
-                        <a href="course.html" class="btn btn-outline-success">Learn More</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-sm-6.5">
-                <div class="card my-5 shadow-lg border-success">
-                    <div class="card-header border-success">
-                        <h3 class="text-success">Medical Assistance (MATS)</h3>
-                    </div>
-                    <div class="card-body">
-                        <p>The overall goal of Bachelor of Science in Nursing degree is to produce competent professional nurses who will be able to demonstrate their knowledge, skills, and attitude to provide quality of nursing care in the aspects of the
-                            practical field to meet expected needs and expectations and to promote, maintain and restore health of individuals, families, and communities in common, simple and complex health problems/situations.</p>
-                        <a href="course.html" class="btn btn-outline-success">Learn More</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> -->
-
-        <!--------------------------------------- Massages --------------------------------------->
-
-
-
-        <!--------------------------------------- Photo Gallery --------------------------------------->
-        <div class="container mb-5">
-            <hr class="border-2 border-top border-success">
-            <h2 class="text-center text-success text-gradient"> Gallery </h2>
-            <hr class="border-2 border-top border-success">
-            <!-- <div class="row">
-            <div class="card text-center" id="photoGallery">
-                <img class="card-img-top" src="static/images/img4.jpeg">
-            </div>
-            <div class="card text-center" id="photoGallery">
-                <img class="card-img-top" src="static/images/img5.jpeg">
-
-            </div>
-            <div class="card text-center" id="photoGallery">
-                <img class="card-img-top" src="static/images/img6.jpeg">
-            </div>
-            <div class="card text-center" id="photoGallery">
-                <img class="card-img-top" src="static/images/img7.jpeg">
-            </div>
-            <div class="card text-center">
-                <div>
-                    <h6><a href="gallery.html">SEE MORE</a></h6>
-                </div>
-            </div>
-        </div> -->
-
-            <section class="gallery">
-                <div class="container-lg">
-                    <div class="row gy-4 row-cols-1 row-cols-sm-2 row-cols-md-3">
-                        <div class="col">
-                            <img src="static/images/img1.avif" class="gallery-item" alt="gallery">
+                    <div class="row g-0">
+                        <div class="col-md-4 pt-3">
+                            <img src="{{ url_for('static', filename='images/building_1.jpeg')}}" class="img-fluid rounded-start" alt="Bachelor of Science in Nursing">
                         </div>
-                        <div class="col">
-                            <img src="static/images/img2.jpg" class="gallery-item" alt="gallery">
-                        </div>
-                        <div class="col">
-                            <img src="{{ url_for('static', filename='images/img3.jpg') }}" alt="Image">
-                        </div>
-                        <div class="col d-grid">
-                            <!-- empty for design purpose -->
-                        </div>
-                        <div class="col d-grid">
-                            <a href="gallery.html" class="btn btn-outline-info">SEE MORE</a>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <!-- model for showing the full size static/images -->
-            <div class="modal fade" id="gallery-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-body" style="padding: 0px;">
-                            <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; float: right;"><i class="bi bi-x-circle-fill"></i></button>
-                            <img src="static/images" class="modal-img" alt="modal img">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-        <!--------------------------------------- Links --------------------------------------->
-        <div class="container-fluid bg-dark bg-gradient ">
-            <div class="container">
-                <div class="row justify-content-between">
-                    <div class="col-sm-4 my-2">
-                        <div class="d-flex align-items-center">
-                            <img src="static/images/ACN LOGO.png" alt="Avatar Logo" style="width:70px;" class="rounded-pill me-2">
-                            <div class="text-light">
-                                <h5 class="card-title">American College Of Nursing</h5>
-                                <p class="card-text"><small class="text-muted">KLD Road, Anantapur, Andhra Pradesh</small></p>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h4 class="card-title">Bachelor of Science in Nursing (BSc Nursing)</h4>
+                                <p class="card-text">The Bachelor of Science in Nursing (BSc Nursing) program aims to equip students with a comprehensive understanding of nursing theory and practice while developing critical thinking, leadership, and communication skills.
+                                    Emphasizing evidence-based care and cultural competence, the program prepares graduates to deliver high-quality patient care across diverse healthcare settings. With a focus on ethical practice and lifelong learning,
+                                    BSc Nursing graduates are poised to address evolving healthcare needs, advocate for patients' rights, and contribute positively to the healthcare system.</p>
+                                <a href="course.html" class="btn btn-custom">Learn More</a>
                             </div>
                         </div>
-                        <hr class="border-2 border-top border-light mt-0">
-                        <p class="text-white-50">
-                            <i class="bi bi-geo-alt-fill"></i> <a href="https://maps.google.com/?q=American+College+of+Nursing,+Kalyana+Durgam+ROAD,+Andhra+Pradesh+515004,+India">American College of Nursing, Kalyana Durgam Road, Andhra Pradesh 515004, India</a><br>
-                            <i class="bi bi-telephone"></i> <a href="tel:+919989953273">+91 9989953273</a>, <a href="tel:+917013370612">+91 7013370612</a><br>
-                            <i class="bi bi-envelope"></i> <a href="mailto:Americancollegeatp@gmail.com">Americancollegeatp@gmail.com</a>
-                        </p>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Academic Section -->
-                    <div class="col-sm-1 my-1 text-light  ">
-                        <h6>ACADEMIC</h6>
-                        <p><a href="course.html" class="dropdown-item-text">COURSES</a></p>
-                        <p><a href="faculties.html" class="dropdown-item-text">FACULTIES</a></p>
-                        <p><a href="admission.html" class="dropdown-item-text">ADMISSION</a></p>
-                    </div>
-
-                    <!-- Campus Section -->
-                    <div class="col-sm-2 my-0 text-light  ">
-                        <h6>CAMPUS</h6>
-                        <p><a href="Residence.html" class="dropdown-item-text">HALL OF RESIDENCE</a></p>
-                        <p><a href="gallery.html" class="dropdown-item-text">GALLERY</a></p>
+            <div class="col-sm-6.5">
+                <div class="card mt-5 shadow-lg border-success">
+                    <div class="row g-0">
+                        <div class="col-md-4 pt-3">
+                            <img src="{{ url_for('static', filename='images/img3.jpeg') }}" class="img-fluid rounded-start" alt="General Nursing and Midwifery">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h4 class="card-title">General Nursing and Midwifery (GNM)</h4>
+                                <p class="card-text">The purpose of GNM nursing courses is to equip students with essential skills needed for diverse healthcare roles, including patient care, medication administration, and medical equipment management. Through practical training
+                                    and theoretical knowledge, GNM programs prepare individuals to meet the evolving demands of the healthcare sector, ensuring quality care delivery and contributing positively to societal well-being.</p>
+                                <a href="course.html" class="btn btn-custom">Learn More</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!--------------------------------------- Footer --------------------------------------->
-        <div class="container-fluid footer">
-            <h6>Copyright © 2024 American College Of Nursing </h6>
+    <!--------------------------------------- Gallery --------------------------------------->
+    <div class="container mb-5">
+        <hr class="border-2 border-top border-success">
+        <h2 class="text-center text-success text-gradient"> Gallery </h2>
+        <hr class="border-2 border-top border-success">
+        <section class="gallery">
+            <div class="container-lg">
+                <div class="row gy-4 row-cols-1 row-cols-sm-2 row-cols-md-3">
+                    <div class="col">
+                        <img src="{{ url_for('static', filename='images/img1.avif')}}" class="gallery-item" alt="gallery">
+                    </div>
+                    <div class="col">
+                        <img src="{{ url_for('static', filename='images/img2.jpg')}}" class="gallery-item" alt="gallery">
+                    </div>
+                    <div class="col">
+                        <img src="{{ url_for('static', filename='images/img3.jpg') }}" class="gallery-item" alt="Image">
+                    </div>
+                    <div class="col d-grid">
+                        <!-- empty for design purpose -->
+                    </div>
+                    <div class="col d-grid">
+                        <a href="gallery.html" class="btn btn-outline-info">SEE MORE</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="modal fade" id="gallery-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-body" style="padding: 0px;">
+                        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; float: right;">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </button>
+                        <img src="static/images" class="modal-img" alt="modal img">
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <button onclick="topFunction()" id="back-to-top-btn" title="Go to top"><i class="bi bi-arrow-up"></i></button>
-        <script src="https://unpkg.com/scrollreveal"></script>
+    <!--------------------------------------- Links --------------------------------------->
+    <div class="container-fluid bg-dark bg-gradient ">
+        <div class="container">
+            <div class="row justify-content-between">
+                <div class="col-sm-4 my-2">
+                    <div class="d-flex align-items-center">
+                        <img src="static/images/ACN LOGO.png" alt="Avatar Logo" style="width:70px;" class="rounded-pill me-2">
+                        <div class="text-light">
+                            <h5 class="card-title">American College Of Nursing</h5>
+                            <p class="card-text"><small class="text-muted">KLD Road, Anantapur, Andhra Pradesh</small></p>
+                        </div>
+                    </div>
+                    <hr class="border-2 border-top border-light mt-0">
+                    <p class="text-white-50">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        <a href="https://maps.google.com/?q=American+College+of+Nursing,+Kalyana+Durgam+ROAD,+Andhra+Pradesh+515004,+India">American College of Nursing, Kalyana Durgam Road, Andhra Pradesh 515004, India</a><br>
+                        <i class="bi bi-telephone"></i>
+                        <a href="tel:+919989953273">+91 9989953273</a>,
+                        <a href="tel:+917013370612">+91 7013370612</a><br>
+                        <i class="bi bi-envelope"></i>
+                        <a href="mailto:Americancollegeatp@gmail.com">Americancollegeatp@gmail.com</a>
+                    </p>
+                </div>
 
-        <script>
-            document.addEventListener("click", function(e) {
-                if (e.target.classList.contains("gallery-item")) {
-                    const src = e.target.getAttribute("src");
-                    document.querySelector(".modal-img").src = src;
-                    const myModal = new bootstrap.Modal(document.getElementById('gallery-modal'));
-                    myModal.show();
-                }
-            });
+                <!-- Academic Section -->
+                <div class="col-sm-1 my-1 text-light ">
+                    <h6>ACADEMIC</h6>
+                    <p><a href="course.html" class="dropdown-item-text">COURSES</a></p>
+                    <p><a href="faculties.html" class="dropdown-item-text">FACULTIES</a></p>
+                    <p><a href="admission.html" class="dropdown-item-text">ADMISSION</a></p>
+                </div>
 
-            window.sr = ScrollReveal();
-            sr.reveal('.container', {
-                duration: 1000
-            });
+                <!-- Campus Section -->
+                <div class="col-sm-2 my-0 text-light ">
+                    <h6>CAMPUS</h6>
+                    <p><a href="Residence.html" class="dropdown-item-text">HALL OF RESIDENCE</a></p>
+                    <p><a href="gallery.html" class="dropdown-item-text">GALLERY</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            // Back to top button functionality
-            window.onscroll = function() {
-                scrollFunction()
-            };
+    <!--------------------------------------- Footer --------------------------------------->
+    <div class="container-fluid footer">
+        <h6>Copyright © 2024 American College Of Nursing </h6>
+    </div>
 
-            function scrollFunction() {
-                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-                    document.getElementById("back-to-top-btn").style.display = "block";
-                } else {
-                    document.getElementById("back-to-top-btn").style.display = "none";
-                }
+    <button onclick="topFunction()" id="back-to-top-btn" title="Go to top"><i class="bi bi-arrow-up"></i></button>
+
+    <script src="https://unpkg.com/scrollreveal"></script>
+    <script>
+        document.addEventListener("click", function(e) {
+            if (e.target.classList.contains("gallery-item")) {
+                const src = e.target.getAttribute("src");
+                document.querySelector(".modal-img").src = src;
+                const myModal = new bootstrap.Modal(document.getElementById('gallery-modal'));
+                myModal.show();
             }
+        });
 
-            function topFunction() {
-                document.body.scrollTop = 0; // For Safari
-                document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        window.sr = ScrollReveal();
+        sr.reveal('.container', {
+            duration: 1000
+        });
+
+        // Back to top button functionality
+        window.onscroll = function() {
+            scrollFunction()
+        };
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                document.getElementById("back-to-top-btn").style.display = "block";
+            } else {
+                document.getElementById("back-to-top-btn").style.display = "none";
             }
-        </script>
+        }
+
+        function topFunction() {
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
+    </script>
 
 </body>
 

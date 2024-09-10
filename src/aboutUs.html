@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0 ">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ANC</title>
     <meta name="description" content="American Nursing College (ANC) in Anantapur, Andhra Pradesh, offers top-tier nursing education, recognized by APNMC and affiliated with YSR University.">
     <meta name="keywords" content="American Nursing College, Nursing, Anantapur, Andhra Pradesh, APNMC, YSR University, BSc Nursing, GNM">
@@ -20,7 +20,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- W3.CSS -->
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="/static/css/aboutUs.css">
+
+    <!-- ScrollReveal.js -->
+    <script src="https://unpkg.com/scrollreveal"></script>
 </head>
 
 <body>
@@ -29,7 +32,7 @@
     <nav class="navbar navbar-expand-sm navbar-dark fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.html">
-                <img src="images/ACN LOGO.png" alt="American Nursing College Logo" style="width:90px;" class="rounded-pill "> ANC</a>
+                <img src="{{ url_for('static', filename='images/ACN LOGO.png') }}" alt="American Nursing College Logo" style="width:90px;" class="rounded-pill "> ANC</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -73,7 +76,7 @@
         <!-- The slideshow/carousel -->
         <div class="carousel-inner">
             <div class="carousel-item active">
-                <img src="images/building_6.jpg" class="d-block" style="width:100%">
+                <img src="{{ url_for('static', filename='images/building_6.jpg') }}" class="d-block" style="width:100%">
                 <div class="carousel-caption coll_name">
                     <h1>American Nursing College</h1>
                     <h2>About Us</h2>
@@ -88,7 +91,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-3 my-3">
-                <img src="images/ACN LOGO.png" style="width:150px;" class="rounded-pill">
+                <img src="{{ url_for('static', filename='images/ACN LOGO.png')}}" style="width:150px;" class="rounded-pill">
                 <h4>American Nursing College</h4>
                 <p><small>KLD Road, Anantapur, Andhra Pradesh </small></p>
             </div>
@@ -111,7 +114,7 @@
             <div class="card messageAU">
                 <div class="row g-0">
                     <div class="col-md-4 pt-4">
-                        <img src="images/chariman.jpg" class="img-fluid rounded-start">
+                        <img src="{{ url_for('static', filename='images/Chairman.jpg')}}" class="img-fluid rounded-start">
                     </div>
                     <div class="col-md-8">
                         <div class="card-body">
@@ -129,7 +132,7 @@
             <div class="card messageAU">
                 <div class="row g-0">
                     <div class="col-md-4 pt-4">
-                        <img src="images/principle.jpg" class="img-fluid rounded-start">
+                        <img src="{{ url_for('static', filename='images/principle.jpg')}}" class="img-fluid rounded-start">
                     </div>
                     <div class="col-md-8">
                         <div class="card-body">
@@ -155,7 +158,7 @@
             <div class="row">
                 <div class="col-sm-4 my-3">
                     <div class="col-sm-4 py-2">
-                        <img src="images/ACN LOGO.png" alt="Avatar Logo" style="width:70px;" class="rounded-pill float-end">
+                        <img src="{{ url_for('static', filename='images/ACN LOGO.png')}}" alt="Avatar Logo" style="width:70px;" class="rounded-pill float-end">
                     </div>
                     <div class="col-sm-8 text-light py-3">
                         <h5 class="card-title">American Nursing College</h5>
