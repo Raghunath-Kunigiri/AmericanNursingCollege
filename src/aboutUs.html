@@ -11,7 +11,7 @@
     <meta name="author" content="American Nursing College">
 
     <!-- Favicon -->
-    <link rel="icon" href="images/ACN LOGO.png" type="image/png">
+    <link rel="icon" href="{{ url_for('static', filename='images/ACN LOGO.png')}}" type="image/png">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Font Icon CSS -->
@@ -114,7 +114,7 @@
             <div class="card messageAU">
                 <div class="row g-0">
                     <div class="col-md-4 pt-4">
-                        <img src="{{ url_for('static', filename='images/Chairman.jpg')}}" class="img-fluid rounded-start">
+                        <img src="{{ url_for('static', filename='images/chairman.jpg')}}" class="img-fluid rounded-start">
                     </div>
                     <div class="col-md-8">
                         <div class="card-body">
