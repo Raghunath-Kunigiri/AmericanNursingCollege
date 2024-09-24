@@ -1,6 +1,3 @@
-Here's a sample `README.md` file for your GitHub repository, along with instructions on how to run the code. You can customize the details as needed.
-
----
 
 # American Nursing College Management System
 
@@ -76,10 +73,3 @@ The application should now be running on `http://127.0.0.1:5000/`.
 - Open a web browser and go to `http://127.0.0.1:5000/`.
 - Use the login form to sign in or register a new account.
 
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
-
-Feel free to add any additional details or instructions specific to your project.
