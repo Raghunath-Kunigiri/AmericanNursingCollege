@@ -8,11 +8,20 @@ load_dotenv()
 
 app = Flask(__name__, template_folder='src')# MongoDB connection
 
-mongo_uri = os.getenv("mongodb+srv://kunigiriraghunath9493:AppcsIAc12mLh7k1@acn.oa10h.mongodb.net/?retryWrites=true&w=majority")
-client = MongoClient(mongo_uri)
-db = client['sample_mflix']  # Replace with your database name
-users_collection = db['users']  # Collection for storing user information
-# Import routes
+mongo_uri = os.getenv("MONGO_URI")
+if not mongo_uri:
+    raise ValueError("No MONGO_URI environment variable set. Please check your .env file.")
+
+try:
+    client = MongoClient(mongo_uri, tls=True, )  # Ensure TLS is enabled
+    db_name = mongo_uri.split("/")[-1].split("?")[0]  # Extract database name from URI
+    db = client[db_name]  # Use the extracted database name
+    users_collection = db['users']  # Collection for storing user information
+    print("✅ Connected to MongoDB successfully!")
+except Exception as e:
+    print(f"❌ Error connecting to MongoDB: {e}")
+    exit(1)
+
 from routes.routes import *
 
 if __name__ == '__main__':

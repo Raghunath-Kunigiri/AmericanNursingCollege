@@ -21,6 +21,7 @@
                     <input class="username-input" type="text" placeholder="Username">
                     <input class="email-input" type="text" placeholder="Email">
                     <input class="password-input" type="password" placeholder="Password">
+                    <input class="confirm-password-input" type="password" placeholder="Confirm Password">
                 </div>
                 <div class="container-button">
                     <button class="btn" id="sign-up-btn">Sign Up</button>
@@ -115,7 +116,7 @@
                 });
         });
         document.getElementById('login-btn').addEventListener('click', function() {
-            const email = document.querySelector('.login-form .username-input').value;
+            const email = document.querySelector('.login-form .email-input').value;
             const password = document.querySelector('.login-form .password-input').value;
 
             fetch('/login_user', {

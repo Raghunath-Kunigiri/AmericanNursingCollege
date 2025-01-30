@@ -1,12 +1,14 @@
-from flask import render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import app, db
+# from flask_pymongo import PyMongo
+from app import app, db, users_collection
+
 
 users_collection = db['users']  # Collection for storing user information
-@app.route('/')
-def home():
-    # Redirect to the login page
-    return render_template('login.html')
+
+# @app.route('/')
+# def home():
+#     return "Welcome to the Flask App!"
 
 @app.route('/')
 def login():
@@ -16,6 +18,7 @@ def login():
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.json
+    print("Received data:", data)  # Debugging line
     username = data.get('username')
     email = data.get('email')
     password = data.get('password')
