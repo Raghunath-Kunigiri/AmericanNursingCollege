@@ -21,6 +21,7 @@
                     <input class="username-input" type="text" placeholder="Username">
                     <input class="email-input" type="text" placeholder="Email">
                     <input class="password-input" type="password" placeholder="Password">
+                    <input class ="confirm-password-input" type ="password" placeholder="Confirm Password">
                 </div>
                 <div class="container-button">
                     <button class="btn" id="sign-up-btn">Sign Up</button>
@@ -92,6 +93,12 @@
             const password = document.querySelector('.password-input').value;
             const confirmPassword = document.querySelector('.confirm-password-input').value;
 
+            if (!username || !email || !password || !confirmPassword) {
+                console.error('One or more input fields are missing');
+                return;
+            }
+
+
             if (password !== confirmPassword) {
                 alert('Passwords do not match');
                 return;
@@ -111,12 +118,17 @@
                 .then(response => response.json())
                 .then(data => {
                     alert(data.message);
-
-                });
-        });
+                    if (data.message === 'User registered successfully') {
+                        document.getElementById('sign-up-form').style.display = 'none';
+                        document.getElementById('login-form').style.display = 'block';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        
         document.getElementById('login-btn').addEventListener('click', function() {
-            const email = document.querySelector('.login-form .username-input').value;
-            const password = document.querySelector('.login-form .password-input').value;
+            const email = document.querySelector('.login-form .email-input').value;
+            const password = document.querySelector('.login-form input[type="password"]').value;
 
             fetch('/login_user', {
                     method: 'POST',

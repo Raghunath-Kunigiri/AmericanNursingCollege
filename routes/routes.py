@@ -5,12 +5,10 @@ from app import app, db
 users_collection = db['users']  # Collection for storing user information
 @app.route('/')
 def home():
-    # Redirect to the login page
-    return render_template('login.html')
-
-@app.route('/')
+    return render_template('index.html')
+@app.route('/index.html')
 def login():
-    return render_template('login.html')
+    return render_template('index.html')
 
 # Signup Route
 @app.route('/signup', methods=['POST'])
@@ -56,7 +54,7 @@ def forgot_password():
     if user:
         hashed_password = generate_password_hash(new_password)
         users_collection.update_one({'email': email}, {'$set': {'password': hashed_password}})
-        return jsonify({'message': 'Password reset successful'}), 200
+        return jsonify({'message': 'Email found. Proceed with reset.'}), 200
     else:
         return jsonify({'message': 'User not found'}), 404
 
