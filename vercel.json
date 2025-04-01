@@ -10,6 +10,7 @@
       "use": "@vercel/static"
     }
   ],
+  
   "routes": [
     {
       "src": "/static/(.*)",
@@ -20,4 +21,8 @@
       "dest": "/$1"
     }
   ]
+  {
+    "source": "/feedback/((?!general).*)",
+    "destination": "/api/feedback/general"
+  }
 } 
