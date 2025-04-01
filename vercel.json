@@ -21,8 +21,4 @@
       "dest": "/$1"
     }
   ]
-  {
-    "source": "/feedback/((?!general).*)",
-    "destination": "/api/feedback/general"
-  }
 } 
