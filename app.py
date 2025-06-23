@@ -161,7 +161,7 @@ def save_admission():
         
         # Check if phone number already exists
         phone_exists = False
-        if MONGODB_AVAILABLE and admissions_collection:
+        if MONGODB_AVAILABLE and admissions_collection is not None:
             existing = admissions_collection.find_one({'phone': application_id})
             phone_exists = existing is not None
         else:
@@ -182,7 +182,7 @@ def save_admission():
             'status': 'pending'
         }
 
-        if MONGODB_AVAILABLE and admissions_collection:
+        if MONGODB_AVAILABLE and admissions_collection is not None:
             try:
                 result = admissions_collection.insert_one(admission_data)
                 application_id = str(result.inserted_id)
@@ -231,7 +231,7 @@ def save_admission():
 def check_email_exists(email):
     try:
         email_exists = False
-        if MONGODB_AVAILABLE and admissions_collection:
+        if MONGODB_AVAILABLE and admissions_collection is not None:
             existing = admissions_collection.find_one({'email': email})
             email_exists = existing is not None
         else:
@@ -294,7 +294,7 @@ def get_applications():
         sort_by = request.args.get('sort', 'date')  # date, name, status
         sort_order = request.args.get('order', 'desc')  # asc, desc
         
-        if MONGODB_AVAILABLE and admissions_collection:
+        if MONGODB_AVAILABLE and admissions_collection is not None:
             # Build MongoDB query
             query = {}
             if search_query:
@@ -352,7 +352,7 @@ def update_application_status(application_id):
         if not new_status:
             return jsonify({'success': False, 'message': 'Status is required'}), 400
         
-        if MONGODB_AVAILABLE and admissions_collection:
+        if MONGODB_AVAILABLE and admissions_collection is not None:
             result = admissions_collection.update_one(
                 {'_id': application_id},
                 {'$set': {'status': new_status}}
