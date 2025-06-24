@@ -1,10 +1,11 @@
 // API Configuration
 const API_CONFIG = {
-    // Change this to your production API URL if needed
+    // For Vercel deployment (recommended setup)
+    BASE_URL: '', // Empty for relative URLs - both frontend and API on same domain
+    
+    // Other deployment options:
     // For local development: 'http://localhost:5000'
-    // For production on same domain: '' (empty string for relative URLs)
     // For production on different domain: 'https://your-api-domain.com'
-    BASE_URL: '', // Empty string means relative URLs (/api/...)
     
     // Request timeout in milliseconds
     TIMEOUT: 30000
