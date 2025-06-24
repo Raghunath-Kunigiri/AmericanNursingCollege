@@ -1,25 +1,37 @@
 // API Configuration
-const API_BASE_URL = window.location.origin + '/api';
+const API_CONFIG = {
+    // Change this to your production API URL if needed
+    // For local development: 'http://localhost:5000'
+    // For production on same domain: '' (empty string for relative URLs)
+    // For production on different domain: 'https://your-api-domain.com'
+    BASE_URL: '', // Empty string means relative URLs (/api/...)
+    
+    // Request timeout in milliseconds
+    TIMEOUT: 30000
+};
 
 // API Helper Functions
 class CollegeAPI {
     constructor() {
-        this.baseURL = API_BASE_URL;
+        this.baseUrl = API_CONFIG.BASE_URL;
+        this.timeout = API_CONFIG.TIMEOUT;
     }
 
     // Generic API call method
     async apiCall(endpoint, options = {}) {
-        const url = `${this.baseURL}${endpoint}`;
-        const config = {
+        const url = `${this.baseUrl}/api${endpoint}`;
+        
+        const defaultOptions = {
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                ...options.headers
             },
-            ...options
+            // Add timeout handling
+            signal: AbortSignal.timeout ? AbortSignal.timeout(this.timeout) : undefined
         };
 
         try {
-            const response = await fetch(url, config);
+            const response = await fetch(url, { ...defaultOptions, ...options });
             const data = await response.json();
 
             if (!response.ok) {
@@ -29,6 +41,12 @@ class CollegeAPI {
             return data;
         } catch (error) {
             console.error('API call failed:', error);
+            // Add more specific error messages
+            if (error.name === 'AbortError') {
+                throw new Error('Request timeout - please check your connection');
+            } else if (error.message.includes('Failed to fetch')) {
+                throw new Error('Unable to connect to server - please check if the server is running');
+            }
             throw error;
         }
     }
@@ -125,6 +143,8 @@ class FormHandler {
                 return;
             }
             
+            let data = null; // Declare data variable outside try block
+            
             try {
                 // Validate required fields
                 const name = form.querySelector('input[name="name"]').value.trim();
@@ -207,7 +227,7 @@ class FormHandler {
                 const firstName = nameParts[0] || '';
                 const lastName = nameParts.slice(1).join(' ') || '';
                 
-                const data = {
+                data = {
                     firstName: firstName,
                     lastName: lastName,
                     email: formData.get('email') ? formData.get('email').trim() : '',
@@ -223,37 +243,15 @@ class FormHandler {
                     admissionYear: new Date().getFullYear() + 1 // 2025
                 };
 
-                // Debug: Log the data being sent
                 console.log('Submitting application data:', data);
-                
-                // Submit application via API
-                const result = await api.submitApplication(data);
 
-                console.log('API response:', result);
+                // Submit application
+                const response = await api.submitApplication(data);
 
-                if (!result.success) {
-                    throw new Error(result.message || 'Failed to submit application');
-                }
-                
-                // Store application data for printing
-                const applicationData = {
-                    name: result.data.fullName || `${data.firstName} ${data.lastName}`.trim(),
-                    email: result.data.email || data.email,
-                    phone: result.data.phone || data.phone,
-                    course: result.data.program || data.program,
-                    applicationId: result.data.applicationId,
-                    submissionDate: new Date(result.data.applicationDate).toLocaleDateString('en-IN', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'   
-                    })
-                };
-                
-                // Show success message and application details card
-                this.showApplicationCard(applicationData);
-                
+                // Show success message and application card
+                this.showMessage('success', 'Application submitted successfully!');
+                this.showApplicationCard(response.data);
+
                 // Reset form
                 form.reset();
                 
@@ -267,7 +265,9 @@ class FormHandler {
 
             } catch (error) {
                 console.error('Application submission failed:', error);
-                console.error('Submitted data:', data);
+                if (data) {
+                    console.error('Submitted data:', data);
+                }
                 
                 // Get phone number for duplicate error handling
                 const phoneNumber = form.querySelector('input[name="phone"]')?.value || 'your phone number';
@@ -470,6 +470,23 @@ class FormHandler {
         const existingMessages = document.querySelectorAll('.alert, .application-card');
         existingMessages.forEach(msg => msg.remove());
 
+        // Format the application date properly
+        const formatDate = (dateString) => {
+            if (!dateString) return 'Not available';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (error) {
+                return dateString;
+            }
+        };
+
         const cardDiv = document.createElement('div');
         cardDiv.className = 'application-card';
         cardDiv.innerHTML = `
@@ -480,9 +497,8 @@ class FormHandler {
                 <div class="card-body">
                     <div class="text-center mb-4">
                         <div class="alert alert-info">
-                            <strong>Application ID: ${applicationData.applicationId}</strong><br>
-                <small class="text-muted">(Your phone number is your Application ID)</small><br>
-                            <small>Please save this ID for future reference</small>
+                            <strong>Application ID: ${applicationData.applicationId || 'Not available'}</strong><br>
+                            <small class="text-muted">(Please save this ID for future reference)</small>
                         </div>
                     </div>
                     
@@ -493,23 +509,27 @@ class FormHandler {
                             <tbody>
                                 <tr>
                                     <th style="width: 35%; background-color: #f8f9fa;">Full Name</th>
-                                    <td>${applicationData.name}</td>
+                                    <td>${applicationData.fullName || applicationData.name || 'Not provided'}</td>
                                 </tr>
                                 <tr>
                                     <th style="background-color: #f8f9fa;">Email Address</th>
-                                    <td>${applicationData.email}</td>
+                                    <td>${applicationData.email || 'Not provided'}</td>
                                 </tr>
                                 <tr>
                                     <th style="background-color: #f8f9fa;">Phone Number</th>
-                                    <td>${applicationData.phone}</td>
+                                    <td>${applicationData.phone || 'Not provided'}</td>
                                 </tr>
                                 <tr>
                                     <th style="background-color: #f8f9fa;">Course Applied</th>
-                                    <td>${applicationData.course}</td>
+                                    <td>${applicationData.program || applicationData.course || 'Not provided'}</td>
                                 </tr>
                                 <tr>
                                     <th style="background-color: #f8f9fa;">Submission Date</th>
-                                    <td>${applicationData.submissionDate}</td>
+                                    <td>${formatDate(applicationData.applicationDate || applicationData.submissionDate)}</td>
+                                </tr>
+                                <tr>
+                                    <th style="background-color: #f8f9fa;">Application Status</th>
+                                    <td><span class="badge bg-primary">${applicationData.applicationStatus || 'Pending'}</span></td>
                                 </tr>
                             </tbody>
                         </table>

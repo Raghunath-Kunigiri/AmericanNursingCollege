@@ -73,7 +73,13 @@ def submit_contact():
 # @access  Public
 @contact_bp.route('/inquiry-types', methods=['GET'])
 def get_inquiry_types():
-    inquiry_types = Contact.get_inquiry_types()
+    inquiry_types = [
+        {'value': 'admission', 'label': 'Admission Inquiry', 'description': 'Questions about admission process'},
+        {'value': 'course', 'label': 'Course Information', 'description': 'Information about courses and programs'},
+        {'value': 'fees', 'label': 'Fee Structure', 'description': 'Questions about fees and payment'},
+        {'value': 'placement', 'label': 'Placement Assistance', 'description': 'Career placement and job assistance'},
+        {'value': 'other', 'label': 'Other', 'description': 'General inquiries'}
+    ]
     
     return jsonify({
         'success': True,
