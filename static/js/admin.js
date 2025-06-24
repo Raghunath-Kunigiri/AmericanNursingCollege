@@ -147,7 +147,7 @@ let adminDashboard = {
         const errorDiv = document.getElementById('loginError');
 
         // Simple authentication (in production, use proper backend authentication)
-        if (username === 'admin' && password === 'admin123') {
+        if (username === 'Raghu' && password === 'Venkatesh@197276') {
             localStorage.setItem('adminLoggedIn', 'true');
             this.showDashboard();
             errorDiv.classList.add('hidden');
@@ -777,7 +777,7 @@ document.addEventListener("DOMContentLoaded", function () {
         e.preventDefault();
         const username = document.getElementById("username").value;
         const password = document.getElementById("password").value;
-        if (username === "admin" && password === "admin123") {
+        if (username === "Raghu" && password === "Venkatesh@197276") {
             loginModal.classList.add("hidden");
             dashboard.classList.remove("hidden");
         } else {

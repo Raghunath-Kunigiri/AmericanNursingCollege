@@ -51,6 +51,11 @@ limiter = Limiter(
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Register blueprints
+if MONGODB_AVAILABLE:
+    app.register_blueprint(students_bp, url_prefix='/api/students')
+    app.register_blueprint(contact_bp, url_prefix='/api/contact')
+
 # MongoDB connection
 client = None
 db = None
@@ -151,53 +156,75 @@ def save_admission():
         if not data:
             return jsonify({'success': False, 'message': 'No data provided'}), 400
 
-        required_fields = ['name', 'email', 'phone', 'course']
+        required_fields = ['name', 'phone', 'course']
         for field in required_fields:
             if not data.get(field):
                 return jsonify({'success': False, 'message': f'{field.capitalize()} is required'}), 400
 
-        # Use phone number as application ID
-        application_id = data.get('phone')
+        # Generate Application ID: ANC + Course Initials + Year + Last 5 Phone Digits
+        def generate_application_id(course, phone):
+            course_initials = {
+                'General Nursing': 'GNM',
+                'General Nursing & Midwifery': 'GNM',
+                'Bachelor in Nursing': 'BSN',
+                'Bachelor of Science in Nursing': 'BSN',
+                'Paramedical Nursing': 'PMN',
+                'Paramedical in Nursing': 'PMN',
+                'Medical Lab Technician': 'MLT',
+                'Cardiology Technician': 'CTN',
+                'Multipurpose Health Assistant': 'MHA'
+            }
+            
+            course_code = course_initials.get(course, 'GEN')
+            year = datetime.now().year + 1  # Next year for admission (2025)
+            last_5_digits = phone[-5:] if len(phone) >= 5 else phone
+            
+            return f"ANC{course_code}{year}{last_5_digits}"
         
-        # Check if phone number already exists
+        # Generate or use provided application ID
+        application_id = data.get('applicationId') or generate_application_id(data.get('course'), data.get('phone'))
+        phone_number = data.get('phone')
+        
+        # Check if phone number already exists (using phone as unique identifier)
         phone_exists = False
         if MONGODB_AVAILABLE and admissions_collection is not None:
-            existing = admissions_collection.find_one({'phone': application_id})
+            existing = admissions_collection.find_one({'phone': phone_number})
             phone_exists = existing is not None
         else:
             applications = load_applications_from_file()
-            phone_exists = any(app.get('phone') == application_id for app in applications)
+            phone_exists = any(app.get('phone') == phone_number for app in applications)
         
         if phone_exists:
             return jsonify({'success': False, 'message': 'Application with this phone number already exists'}), 400
         
         admission_data = {
-            '_id': application_id,  # Use phone as primary key
+            'applicationId': application_id,
             'name': data.get('name'),
-            'email': data.get('email'),
-            'phone': data.get('phone'),
+            'email': data.get('email', ''),
+            'phone': phone_number,
             'course': data.get('course'),
             'message': data.get('message', ''),
             'timestamp': datetime.now(),
-            'status': 'pending'
+            'status': 'pending',
+            'admissionYear': datetime.now().year + 1
         }
 
         if MONGODB_AVAILABLE and admissions_collection is not None:
             try:
                 result = admissions_collection.insert_one(admission_data)
-                application_id = str(result.inserted_id)
+                print(f"✅ Application saved to MongoDB with ID: {application_id}")
             except Exception as e:
-                admission_data['_id'] = application_id
+                print(f"❌ MongoDB save failed, falling back to file: {e}")
                 admission_data['timestamp'] = datetime.now().isoformat()
                 applications = load_applications_from_file()
                 applications.append(admission_data)
                 save_applications_to_file(applications)
         else:
-            admission_data['_id'] = application_id
             admission_data['timestamp'] = datetime.now().isoformat()
             applications = load_applications_from_file()
             applications.append(admission_data)
             save_applications_to_file(applications)
+            print(f"✅ Application saved to file with ID: {application_id}")
 
         try:
             file_exists = os.path.isfile('admissions.csv')
@@ -294,6 +321,9 @@ def get_applications():
         sort_by = request.args.get('sort', 'date')  # date, name, status
         sort_order = request.args.get('order', 'desc')  # asc, desc
         
+        all_applications = []
+        
+        # Get applications from the old system (admissions_collection)
         if MONGODB_AVAILABLE and admissions_collection is not None:
             # Build MongoDB query
             query = {}
@@ -315,7 +345,8 @@ def get_applications():
                 sort_field = 'status'
             
             sort_direction = -1 if sort_order == 'desc' else 1
-            applications = list(admissions_collection.find(query).sort(sort_field, sort_direction))
+            old_applications = list(admissions_collection.find(query).sort(sort_field, sort_direction))
+            all_applications.extend(old_applications)
         else:
             applications = load_applications_from_file()
             
@@ -330,15 +361,56 @@ def get_applications():
                         filtered_apps.append(app)
                 applications = filtered_apps
             
-            # Sort applications
-            if sort_by == 'name':
-                applications.sort(key=lambda x: x.get('name', '').lower(), reverse=(sort_order == 'desc'))
-            elif sort_by == 'status':
-                applications.sort(key=lambda x: x.get('status', ''), reverse=(sort_order == 'desc'))
-            else:  # date
-                applications.sort(key=lambda x: x.get('timestamp', ''), reverse=(sort_order == 'desc'))
+            all_applications.extend(applications)
         
-        return jsonify({'success': True, 'data': applications}), 200
+        # Get applications from the new system (Student model)
+        if MONGODB_AVAILABLE:
+            try:
+                from models.student import Student
+                from routes.students import students_bp
+                
+                # Get all students from the Student model (without pagination)
+                result = Student.get_all(filters={}, page=1, limit=1000)  # High limit to get all
+                students = result['students']
+                
+                # Convert student data to application format for admin panel
+                for student in students:
+                    student_data = student.data if hasattr(student, 'data') else student
+                    
+                    # Create application format
+                    app_data = {
+                        '_id': student_data.get('applicationId', str(student_data.get('_id', ''))),
+                        'name': f"{student_data.get('firstName', '')} {student_data.get('lastName', '')}".strip(),
+                        'email': student_data.get('email', ''),
+                        'phone': student_data.get('phone', ''),
+                        'course': student_data.get('program', student_data.get('course', '')),
+                        'message': student_data.get('message', ''),
+                        'timestamp': student_data.get('createdAt', student_data.get('timestamp', '')),
+                        'status': student_data.get('applicationStatus', 'pending')
+                    }
+                    
+                    # Apply search filter
+                    if search_query:
+                        if not (search_query.lower() in app_data.get('name', '').lower() or
+                                search_query.lower() in app_data.get('email', '').lower() or
+                                search_query.lower() in app_data.get('phone', '').lower() or
+                                search_query.lower() in app_data.get('_id', '').lower()):
+                            continue
+                    
+                    all_applications.append(app_data)
+                    
+            except Exception as e:
+                print(f"Warning: Could not load Student applications: {e}")
+        
+        # Sort all applications
+        if sort_by == 'name':
+            all_applications.sort(key=lambda x: x.get('name', '').lower(), reverse=(sort_order == 'desc'))
+        elif sort_by == 'status':
+            all_applications.sort(key=lambda x: x.get('status', ''), reverse=(sort_order == 'desc'))
+        else:  # date
+            all_applications.sort(key=lambda x: x.get('timestamp', ''), reverse=(sort_order == 'desc'))
+        
+        return jsonify({'success': True, 'data': all_applications}), 200
     except Exception as e:
         print(traceback.format_exc())
         return jsonify({'success': False, 'message': 'Failed to fetch applications'}), 500
@@ -352,26 +424,49 @@ def update_application_status(application_id):
         if not new_status:
             return jsonify({'success': False, 'message': 'Status is required'}), 400
         
-        if MONGODB_AVAILABLE and admissions_collection is not None:
-            result = admissions_collection.update_one(
-                {'_id': application_id},
-                {'$set': {'status': new_status}}
-            )
-            if result.matched_count == 0:
-                return jsonify({'success': False, 'message': 'Application not found'}), 404
-        else:
-            applications = load_applications_from_file()
-            found = False
-            for app in applications:
-                if app.get('_id') == application_id:
-                    app['status'] = new_status
-                    found = True
-                    break
-            
-            if not found:
-                return jsonify({'success': False, 'message': 'Application not found'}), 404
-            
-            save_applications_to_file(applications)
+        application_found = False
+        
+        # Try to update in Student model first (new system)
+        if MONGODB_AVAILABLE:
+            try:
+                from models.student import Student
+                student = Student.find_by_id(application_id)
+                if student:
+                    # Map admin status to student status
+                    status_mapping = {
+                        'approved': 'Approved',
+                        'rejected': 'Rejected',
+                        'reviewed': 'Under Review',
+                        'pending': 'Pending'
+                    }
+                    mapped_status = status_mapping.get(new_status.lower(), new_status)
+                    student.update_status(mapped_status)
+                    application_found = True
+            except Exception as e:
+                print(f"Warning: Could not update Student status: {e}")
+        
+        # If not found in Student model, try old admissions collection
+        if not application_found:
+            if MONGODB_AVAILABLE and admissions_collection is not None:
+                result = admissions_collection.update_one(
+                    {'_id': application_id},
+                    {'$set': {'status': new_status}}
+                )
+                if result.matched_count > 0:
+                    application_found = True
+            else:
+                applications = load_applications_from_file()
+                for app in applications:
+                    if app.get('_id') == application_id:
+                        app['status'] = new_status
+                        application_found = True
+                        break
+                
+                if application_found:
+                    save_applications_to_file(applications)
+        
+        if not application_found:
+            return jsonify({'success': False, 'message': 'Application not found'}), 404
         
         return jsonify({'success': True, 'message': 'Status updated successfully'}), 200
     except Exception as e:

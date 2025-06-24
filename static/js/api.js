@@ -49,6 +49,10 @@ class CollegeAPI {
         return await this.apiCall(`/students/check-email/${encodeURIComponent(email)}`);
     }
 
+    async checkPhoneExists(phone) {
+        return await this.apiCall(`/students/check-phone/${encodeURIComponent(phone)}`);
+    }
+
     async getPrograms() {
         return await this.apiCall('/students/programs');
     }
@@ -115,6 +119,12 @@ class FormHandler {
             const submitBtn = document.getElementById('submitBtn');
             const originalText = submitBtn.innerHTML;
             
+            // Prevent multiple submissions
+            if (submitBtn.disabled) {
+                console.log('Form submission already in progress');
+                return;
+            }
+            
             try {
                 // Validate required fields
                 const name = form.querySelector('input[name="name"]').value.trim();
@@ -134,9 +144,13 @@ class FormHandler {
                 if (!phone) {
                     this.showFieldError(form.querySelector('input[name="phone"]'), 'Phone Number is required');
                     hasErrors = true;
-                } else if (!/^[\+]?[0-9\s\-\(\)]{10,15}$/.test(phone)) {
-                    this.showFieldError(form.querySelector('input[name="phone"]'), 'Please enter a valid phone number');
-                    hasErrors = true;
+                } else {
+                    // Clean phone number for validation
+                    const cleanedPhone = phone.replace(/\D/g, '');
+                    if (cleanedPhone.length < 10 || cleanedPhone.length > 15) {
+                        this.showFieldError(form.querySelector('input[name="phone"]'), 'Please enter a valid phone number (10-15 digits)');
+                        hasErrors = true;
+                    }
                 }
                 
                 if (!course) {
@@ -156,38 +170,79 @@ class FormHandler {
 
                 // Collect form data
                 const formData = new FormData(form);
+                
+                // Clean and validate phone number
+                const cleanPhone = (phone) => {
+                    return phone.replace(/\D/g, ''); // Remove all non-digits
+                };
+                
+                // Generate Application ID: ANC + Course Initials + Year + Last 5 Phone Digits
+                const generateApplicationId = (course, phone) => {
+                    // Course initials mapping
+                    const courseInitials = {
+                        'General Nursing': 'GNM',
+                        'General Nursing & Midwifery': 'GNM',
+                        'Bachelor in Nursing': 'BSN',
+                        'Bachelor of Science in Nursing': 'BSN',
+                        'Paramedical Nursing': 'PMN',
+                        'Paramedical in Nursing': 'PMN',
+                        'Medical Lab Technician': 'MLT',
+                        'Cardiology Technician': 'CTN',
+                        'Multipurpose Health Assistant': 'MHA'
+                    };
+                    
+                    const courseCode = courseInitials[course] || 'GEN';
+                    const year = new Date().getFullYear() + 1; // Next year for admission (2025)
+                    const last5Digits = phone.slice(-5);
+                    
+                    return `ANC${courseCode}${year}${last5Digits}`;
+                };
+                
+                const cleanedPhone = cleanPhone(formData.get('phone'));
+                const selectedCourse = formData.get('course');
+                const fullName = formData.get('name').trim();
+                
+                // Split full name into first and last name
+                const nameParts = fullName.split(' ');
+                const firstName = nameParts[0] || '';
+                const lastName = nameParts.slice(1).join(' ') || '';
+                
                 const data = {
-                    name: formData.get('name'),
-                    email: formData.get('email'),
-                    phone: formData.get('phone'),
-                    course: formData.get('course'),
-                    message: formData.get('message')
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: formData.get('email') ? formData.get('email').trim() : '',
+                    phone: cleanedPhone,
+                    program: selectedCourse,
+                    course: selectedCourse, // Keep for backwards compatibility
+                    message: formData.get('message') ? formData.get('message').trim() : '',
+                    applicationId: generateApplicationId(selectedCourse, cleanedPhone),
+                    
+                    // Required fields with default values
+                    dateOfBirth: new Date(new Date().getFullYear() - 18, 0, 1).toISOString().split('T')[0], // 18 years ago
+                    gender: 'Other', // Default gender, should be updated when we add gender field
+                    admissionYear: new Date().getFullYear() + 1 // 2025
                 };
 
-                // Save to MongoDB
-                const response = await fetch(window.location.origin + '/save-admission', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
+                // Debug: Log the data being sent
+                console.log('Submitting application data:', data);
+                
+                // Submit application via API
+                const result = await api.submitApplication(data);
 
-                if (!response.ok) { 
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Failed to save application');
+                console.log('API response:', result);
+
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to submit application');
                 }
-
-                const result = await response.json();
                 
                 // Store application data for printing
                 const applicationData = {
-                    name: data.name,
-                    email: data.email,
-                    phone: data.phone,
-                    course: data.course,
-                    applicationId: result.applicationId,
-                    submissionDate: new Date().toLocaleDateString('en-IN', {
+                    name: result.data.fullName || `${data.firstName} ${data.lastName}`.trim(),
+                    email: result.data.email || data.email,
+                    phone: result.data.phone || data.phone,
+                    course: result.data.program || data.program,
+                    applicationId: result.data.applicationId,
+                    submissionDate: new Date(result.data.applicationDate).toLocaleDateString('en-IN', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
@@ -212,7 +267,59 @@ class FormHandler {
 
             } catch (error) {
                 console.error('Application submission failed:', error);
-                this.showMessage('error', 'Failed to submit application. Please try again.');
+                console.error('Submitted data:', data);
+                
+                // Get phone number for duplicate error handling
+                const phoneNumber = form.querySelector('input[name="phone"]')?.value || 'your phone number';
+                
+                // Handle specific error types
+                let errorMessage = 'Failed to submit application. Please try again.';
+                
+                if (error.message.includes('Validation failed')) {
+                    errorMessage = `
+                        <div class="validation-error">
+                            <h5><i class="fas fa-exclamation-triangle"></i> Validation Error</h5>
+                            <p>Please check that all required information is provided correctly.</p>
+                            <p><small>The system requires basic information to process your application. If this error persists, please contact our support team.</small></p>
+                            <div class="error-actions">
+                                <button class="btn btn-sm btn-secondary" onclick="contactSupport()">
+                                    <i class="fas fa-phone"></i> Contact Support
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else if (error.message.includes('phone number already exists')) {
+                    errorMessage = `
+                        <div class="duplicate-error">
+                            <h5><i class="fas fa-exclamation-triangle"></i> Phone Number Already Used</h5>
+                            <p>This phone number is already used. Please use a different number.</p>
+                            <div class="error-actions">
+                                <button class="btn btn-sm btn-secondary" onclick="contactSupport()">
+                                    <i class="fas fa-phone"></i> Contact Support
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else if (error.message.includes('email already exists')) {
+                    errorMessage = `
+                        <div class="duplicate-error">
+                            <h5><i class="fas fa-exclamation-triangle"></i> Email Already Registered</h5>
+                            <p>An application with this email address already exists in our system.</p>
+                            <div class="error-actions">
+                                <button class="btn btn-sm btn-info" onclick="showTrackingOption('${phoneNumber}')">
+                                    <i class="fas fa-search"></i> Track Your Application
+                                </button>
+                                <button class="btn btn-sm btn-secondary" onclick="contactSupport()">
+                                    <i class="fas fa-phone"></i> Contact Support
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else if (error.message.includes('network')) {
+                    errorMessage = 'Network error. Please check your internet connection and try again.';
+                }
+                
+                this.showMessage('error', errorMessage);
             } finally {
                 // Reset button state
                 submitBtn.disabled = false;
@@ -235,6 +342,26 @@ class FormHandler {
                         }
                     } catch (error) {
                         console.error('Email check failed:', error);
+                    }
+                }
+            });
+        }
+
+        // Phone validation
+        const phoneInput = form.querySelector('input[name="phone"]');
+        if (phoneInput) {
+            phoneInput.addEventListener('blur', async (e) => {
+                const phone = e.target.value.trim().replace(/\D/g, ''); // Clean phone number
+                if (phone && phone.length >= 10) {
+                    try {
+                        const response = await api.checkPhoneExists(phone);
+                        if (response.exists) {
+                            this.showFieldError(phoneInput, 'This phone number is already used. Please use a different number.');
+                        } else {
+                            this.clearFieldError(phoneInput);
+                        }
+                    } catch (error) {
+                        console.error('Phone check failed:', error);
                     }
                 }
             });
@@ -591,7 +718,15 @@ class ApplicationTracker {
             this.displayStatus(response.data);
         } catch (error) {
             console.error('Failed to check application status:', error);
-            formHandler.showMessage('error', 'Application not found or invalid ID');
+            
+            // Provide specific messages based on Application ID format
+            if (applicationId.startsWith('ANC')) {
+                formHandler.showMessage('error', `Application ID ${applicationId} not found. Please verify the format (e.g., ANCGNM202556789).`);
+            } else if (/^\d+$/.test(applicationId)) {
+                formHandler.showMessage('error', 'Phone number-based tracking is deprecated. Please use your Application ID starting with ANC.');
+            } else {
+                formHandler.showMessage('error', 'Invalid Application ID format. Use format: ANCXXX202XXXXX');
+            }
         }
     }
 
@@ -850,6 +985,216 @@ function closeApplicationCard() {
     }
 }
 
+// Support functions for error handling
+function showTrackingOption(applicationId) {
+    // Remove any existing messages
+    const existingMessages = document.querySelectorAll('.alert');
+    existingMessages.forEach(msg => msg.remove());
+    
+    // Create tracking form
+    const trackingDiv = document.createElement('div');
+    trackingDiv.className = 'alert alert-info tracking-form';
+    trackingDiv.innerHTML = `
+        <h5><i class="fas fa-search"></i> Track Your Application</h5>
+        <p>Enter your application ID (phone number) to check the status:</p>
+        <div class="input-group mb-3">
+            <input type="tel" class="form-control" id="trackApplicationId" placeholder="Enter your phone number" value="${applicationId}">
+            <button class="btn btn-primary" onclick="trackApplication()">
+                <i class="fas fa-search"></i> Track
+            </button>
+        </div>
+    `;
+    
+    // Insert after the form
+    const form = document.getElementById('admissionForm');
+    if (form) {
+        form.parentNode.insertBefore(trackingDiv, form.nextSibling);
+    }
+}
+
+function contactSupport() {
+    // Scroll to contact section
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Pre-fill contact form with support inquiry
+    setTimeout(() => {
+        const inquirySelect = document.querySelector('select[name="inquiry"]');
+        const messageField = document.querySelector('#contact-message');
+        
+        if (inquirySelect) {
+            inquirySelect.value = 'other';
+        }
+        
+        if (messageField) {
+            messageField.value = 'I need assistance with my application submission. I received an error that my phone number already exists in the system.';
+            messageField.focus();
+        }
+    }, 1000);
+}
+
+async function trackApplication() {
+    const applicationId = document.getElementById('trackApplicationId').value.trim();
+    if (!applicationId) {
+        alert('Please enter your application ID (phone number)');
+        return;
+    }
+    
+    try {
+        const tracker = new ApplicationTracker();
+        await tracker.checkStatus(applicationId);
+    } catch (error) {
+        console.error('Failed to track application:', error);
+        alert('Failed to track application. Please contact support.');
+    }
+}
+
+// Testimonial Slider Class
+class TestimonialSlider {
+    constructor() {
+        this.currentIndex = 0;
+        this.testimonials = [];
+        this.slider = null;
+        this.dots = null;
+        this.prevBtn = null;
+        this.nextBtn = null;
+        this.autoPlayInterval = null;
+        this.autoPlayDelay = 5000; // 5 seconds
+        
+        this.init();
+    }
+    
+    init() {
+        this.slider = document.querySelector('.testimonials-slider');
+        if (!this.slider) return;
+        
+        this.testimonials = Array.from(this.slider.querySelectorAll('.testimonial-card'));
+        this.prevBtn = document.getElementById('prevTestimonial');
+        this.nextBtn = document.getElementById('nextTestimonial');
+        this.dotsContainer = document.getElementById('testimonialDots');
+        
+        if (this.testimonials.length === 0) return;
+        
+        this.createDots();
+        this.setupEventListeners();
+        this.showTestimonial(0);
+        this.startAutoPlay();
+    }
+    
+    createDots() {
+        if (!this.dotsContainer) return;
+        
+        this.dotsContainer.innerHTML = '';
+        this.testimonials.forEach((_, index) => {
+            const dot = document.createElement('div');
+            dot.className = 'testimonial-dot';
+            dot.addEventListener('click', () => this.goToTestimonial(index));
+            this.dotsContainer.appendChild(dot);
+        });
+        
+        this.dots = Array.from(this.dotsContainer.querySelectorAll('.testimonial-dot'));
+    }
+    
+    setupEventListeners() {
+        if (this.prevBtn) {
+            this.prevBtn.addEventListener('click', () => this.previousTestimonial());
+        }
+        
+        if (this.nextBtn) {
+            this.nextBtn.addEventListener('click', () => this.nextTestimonial());
+        }
+        
+        // Pause autoplay on hover
+        if (this.slider) {
+            this.slider.addEventListener('mouseenter', () => this.stopAutoPlay());
+            this.slider.addEventListener('mouseleave', () => this.startAutoPlay());
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') this.previousTestimonial();
+            if (e.key === 'ArrowRight') this.nextTestimonial();
+        });
+    }
+    
+    showTestimonial(index) {
+        // Remove active class from all testimonials
+        this.testimonials.forEach(testimonial => {
+            testimonial.classList.remove('active');
+        });
+        
+        // Remove active class from all dots
+        if (this.dots) {
+            this.dots.forEach(dot => {
+                dot.classList.remove('active');
+            });
+        }
+        
+        // Show current testimonial
+        if (this.testimonials[index]) {
+            this.testimonials[index].classList.add('active');
+        }
+        
+        // Highlight current dot
+        if (this.dots && this.dots[index]) {
+            this.dots[index].classList.add('active');
+        }
+        
+        // Update button states
+        this.updateButtonStates();
+        
+        this.currentIndex = index;
+    }
+    
+    updateButtonStates() {
+        if (this.prevBtn) {
+            this.prevBtn.disabled = this.currentIndex === 0;
+        }
+        
+        if (this.nextBtn) {
+            this.nextBtn.disabled = this.currentIndex === this.testimonials.length - 1;
+        }
+    }
+    
+    nextTestimonial() {
+        const nextIndex = (this.currentIndex + 1) % this.testimonials.length;
+        this.goToTestimonial(nextIndex);
+    }
+    
+    previousTestimonial() {
+        const prevIndex = this.currentIndex === 0 ? this.testimonials.length - 1 : this.currentIndex - 1;
+        this.goToTestimonial(prevIndex);
+    }
+    
+    goToTestimonial(index) {
+        if (index >= 0 && index < this.testimonials.length) {
+            this.showTestimonial(index);
+            this.restartAutoPlay();
+        }
+    }
+    
+    startAutoPlay() {
+        this.stopAutoPlay();
+        this.autoPlayInterval = setInterval(() => {
+            this.nextTestimonial();
+        }, this.autoPlayDelay);
+    }
+    
+    stopAutoPlay() {
+        if (this.autoPlayInterval) {
+            clearInterval(this.autoPlayInterval);
+            this.autoPlayInterval = null;
+        }
+    }
+    
+    restartAutoPlay() {
+        this.stopAutoPlay();
+        this.startAutoPlay();
+    }
+}
+
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize form handlers
@@ -860,6 +1205,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize application tracker
     const applicationTracker = new ApplicationTracker();
+    
+    // Initialize testimonial slider
+    const testimonialSlider = new TestimonialSlider();
 
     // Health check
     api.healthCheck().then(response => {

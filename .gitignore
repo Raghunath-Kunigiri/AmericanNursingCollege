@@ -203,3 +203,5 @@ config/local.json
 # Temporary files
 *.tmp
 *.temp 
+
+project_structure_analysis.md

@@ -1,8 +1,11 @@
 from datetime import datetime, date
 from bson import ObjectId
 import re
+import logging
 from email_validator import validate_email, EmailNotValidError
 from config.database import get_students_collection
+
+logger = logging.getLogger(__name__)
 
 class ValidationError(Exception):
     def __init__(self, message, errors=None):
@@ -12,12 +15,15 @@ class ValidationError(Exception):
 class Student:
     # Program choices
     PROGRAM_CHOICES = [
-        'General Nursing and Midwifery (GNM)',
-        'Bachelor of Science in Nursing (BSc Nursing)',
-        'Paramedical Courses',
+        'General Nursing',
+        'Bachelor in Nursing',
+        'Paramedical Nursing',
         'Medical Lab Technician',
         'Cardiology Technician',
-        'Multipurpose Health Assistant'
+        'Multipurpose Health Assistant',
+        'General Nursing and Midwifery (GNM)',
+        'Bachelor of Science in Nursing (BSc Nursing)',
+        'Paramedical Courses'
     ]
     
     # Gender choices
@@ -45,10 +51,25 @@ class Student:
         if errors:
             raise ValidationError("Validation failed", errors)
         
-        # Check if email already exists
-        existing = student.collection.find_one({'email': student_data['email'].lower()})
-        if existing:
-            raise ValidationError("A student with this email already exists")
+        # Check if email already exists (only if email is provided)
+        if student_data.get('email'):
+            try:
+                existing_email = student.collection.find_one({'email': student_data['email'].lower()})
+                if existing_email:
+                    raise ValidationError("A student with this email already exists", ["Email already exists"])
+            except Exception as e:
+                # Database not available, skip duplicate check
+                logger.warning(f"Database not available for email check: {e}")
+        
+        # Check if phone number already exists
+        if student_data.get('phone'):
+            try:
+                existing_phone = student.collection.find_one({'phone': student_data['phone']})
+                if existing_phone:
+                    raise ValidationError("A student with this phone number already exists", ["Phone number already exists"])
+            except Exception as e:
+                # Database not available, skip duplicate check
+                logger.warning(f"Database not available for phone check: {e}")
         
         # Prepare data for insertion
         student.data = student._prepare_data(student_data)
@@ -56,29 +77,61 @@ class Student:
         student.data['updatedAt'] = datetime.utcnow()
         
         # Insert into database
-        result = student.collection.insert_one(student.data)
-        student._id = result.inserted_id
-        student.data['_id'] = result.inserted_id
-        
-        return student
+        try:
+            result = student.collection.insert_one(student.data)
+            student._id = result.inserted_id
+            student.data['_id'] = result.inserted_id
+            
+            return student
+        except Exception as db_error:
+            # Handle database insertion errors
+            error_msg = str(db_error)
+            if 'duplicate key' in error_msg.lower():
+                raise ValidationError("Duplicate entry detected", ["A record with this information already exists"])
+            else:
+                raise ValidationError(f"Database error: {error_msg}", ["Database insertion failed"])
     
     @classmethod
     def find_by_id(cls, student_id):
-        """Find student by ID"""
+        """Find student by ID or Application ID"""
         collection = get_students_collection()
+        
+        # First try to find by Application ID (new format)
+        if isinstance(student_id, str) and student_id.startswith('ANC'):
+            data = collection.find_one({'applicationId': student_id})
+            if data:
+                return cls(data)
+        
+        # Then try to find by MongoDB ObjectId
         try:
             data = collection.find_one({'_id': ObjectId(student_id)})
             if data:
                 return cls(data)
-            return None
         except:
-            return None
+            pass
+        
+        # Finally try to find by phone number (legacy support)
+        if isinstance(student_id, str) and student_id.isdigit():
+            data = collection.find_one({'phone': student_id})
+            if data:
+                return cls(data)
+        
+        return None
     
     @classmethod
     def find_by_email(cls, email):
         """Find student by email"""
         collection = get_students_collection()
         data = collection.find_one({'email': email.lower()})
+        if data:
+            return cls(data)
+        return None
+    
+    @classmethod
+    def find_by_phone(cls, phone):
+        """Find student by phone number"""
+        collection = get_students_collection()
+        data = collection.find_one({'phone': phone})
         if data:
             return cls(data)
         return None
@@ -248,20 +301,25 @@ class Student:
         
         # Required fields
         required_fields = [
-            'firstName', 'lastName', 'email', 'phone', 'dateOfBirth',
+            'firstName', 'lastName', 'phone', 'dateOfBirth',
             'gender', 'program', 'admissionYear'
         ]
+        # Email is optional
         
         for field in required_fields:
             if not data.get(field):
                 errors.append(f"{field} is required")
         
-        # Email validation
-        if data.get('email'):
+        # Email validation (only if provided)
+        email = data.get('email', '').strip()
+        if email:
             try:
-                validate_email(data['email'])
+                validate_email(email)
             except EmailNotValidError:
                 errors.append("Please provide a valid email")
+            except ImportError:
+                # Email validation library not available, skip validation
+                pass
         
         # Phone validation
         if data.get('phone'):
@@ -296,15 +354,15 @@ class Student:
             if data['admissionYear'] < current_year:
                 errors.append("Admission year cannot be in the past")
         
-        # Address validation
-        if data.get('address'):
+        # Address validation (only if address is provided and has content)
+        if data.get('address') and any(data['address'].values()):
             address_required = ['street', 'city', 'state', 'zipCode']
             for field in address_required:
                 if not data['address'].get(field):
                     errors.append(f"Address {field} is required")
         
-        # Previous education validation
-        if data.get('previousEducation'):
+        # Previous education validation (only if education data is provided and has content)
+        if data.get('previousEducation') and any(data['previousEducation'].values()):
             edu_required = ['qualification', 'institution', 'yearOfCompletion', 'percentage']
             for field in edu_required:
                 if not data['previousEducation'].get(field):
@@ -334,6 +392,19 @@ class Student:
         prepared['applicationStatus'] = 'Pending'
         prepared['isActive'] = True
         
+        # Generate Application ID if not provided
+        course_field = prepared.get('course') or prepared.get('program')
+        if not prepared.get('applicationId') and prepared.get('phone') and course_field:
+            prepared['applicationId'] = self._generate_application_id(course_field, prepared['phone'])
+        
+        # Ensure program field is set (backwards compatibility)
+        if prepared.get('course') and not prepared.get('program'):
+            prepared['program'] = prepared['course']
+        
+        # Set admission year if not provided
+        if not prepared.get('admissionYear'):
+            prepared['admissionYear'] = datetime.now().year + 1
+        
         # Set default country
         if 'address' in prepared and 'country' not in prepared['address']:
             prepared['address']['country'] = 'India'
@@ -343,6 +414,29 @@ class Student:
             prepared['dateOfBirth'] = datetime.fromisoformat(prepared['dateOfBirth'].replace('Z', '+00:00'))
         
         return prepared
+    
+    def _generate_application_id(self, course, phone):
+        """Generate Application ID: ANC + Course Initials + Year + Last 5 Phone Digits"""
+        course_initials = {
+            'General Nursing': 'GNM',
+            'General Nursing & Midwifery': 'GNM',
+            'General Nursing and Midwifery (GNM)': 'GNM',
+            'Bachelor in Nursing': 'BSN',
+            'Bachelor of Science in Nursing': 'BSN',
+            'Bachelor of Science in Nursing (BSc Nursing)': 'BSN',
+            'Paramedical Nursing': 'PMN',
+            'Paramedical in Nursing': 'PMN',
+            'Paramedical Courses': 'PMN',
+            'Medical Lab Technician': 'MLT',
+            'Cardiology Technician': 'CTN',
+            'Multipurpose Health Assistant': 'MHA'
+        }
+        
+        course_code = course_initials.get(course, 'GEN')
+        year = datetime.now().year + 1  # Next year for admission (2025)
+        last_5_digits = str(phone)[-5:] if len(str(phone)) >= 5 else str(phone)
+        
+        return f"ANC{course_code}{year}{last_5_digits}"
     
     def _generate_student_id(self):
         """Generate unique student ID"""

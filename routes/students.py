@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import logging
+from datetime import datetime
 from models.student import Student, ValidationError
 
 # Create blueprint
@@ -16,6 +17,27 @@ limiter = None
 def init_limiter(app_limiter):
     global limiter
     limiter = app_limiter
+
+# @route   POST /api/students/debug
+# @desc    Debug endpoint to see what data is being received
+# @access  Public
+@students_bp.route('/debug', methods=['POST'])
+def debug_data():
+    try:
+        data = request.get_json()
+        return jsonify({
+            'success': True,
+            'message': 'Debug data received',
+            'received_data': data,
+            'headers': dict(request.headers),
+            'content_type': request.content_type
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': 'Debug error',
+            'error': str(e)
+        }), 400
 
 # @route   POST /api/students/apply
 # @desc    Submit student admission application
@@ -38,21 +60,26 @@ def apply():
             'success': True,
             'message': 'Application submitted successfully',
             'data': {
-                'applicationId': str(student._id),
+                'applicationId': student.data.get('applicationId', str(student._id)),
                 'fullName': student.get_full_name(),
-                'email': student.data['email'],
-                'program': student.data['program'],
+                'email': student.data.get('email', ''),
+                'phone': student.data.get('phone', ''),
+                'program': student.data.get('program', student.data.get('course', '')),
                 'applicationStatus': student.data['applicationStatus'],
-                'applicationDate': student.data['createdAt'].isoformat()
+                'applicationDate': student.data['createdAt'].isoformat(),
+                'admissionYear': student.data.get('admissionYear', datetime.now().year + 1)
             }
         }), 201
         
     except ValidationError as e:
         logger.error(f'Student application validation error: {str(e)}')
+        logger.error(f'Validation errors: {e.validation_errors}')
+        logger.error(f'Submitted data: {data}')
         return jsonify({
             'success': False,
             'message': 'Validation failed',
-            'errors': e.validation_errors
+            'errors': e.validation_errors,
+            'details': str(e)
         }), 400
         
     except Exception as e:
@@ -79,12 +106,14 @@ def get_application_status(application_id):
         return jsonify({
             'success': True,
             'data': {
+                'applicationId': student.data.get('applicationId', str(student._id)),
                 'fullName': student.get_full_name(),
-                'email': student.data['email'],
-                'program': student.data['program'],
+                'email': student.data.get('email', ''),
+                'phone': student.data.get('phone', ''),
+                'program': student.data.get('program', student.data.get('course', '')),
                 'applicationStatus': student.data['applicationStatus'],
                 'applicationDate': student.data['createdAt'].isoformat(),
-                'admissionYear': student.data['admissionYear']
+                'admissionYear': student.data.get('admissionYear', datetime.now().year + 1)
             }
         })
         
@@ -110,6 +139,27 @@ def check_email(email):
         
     except Exception as e:
         logger.error(f'Check email error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'message': 'Server error occurred'
+        }), 500
+
+# @route   GET /api/students/check-phone/<phone>
+# @desc    Check if phone number is already registered
+# @access  Public
+@students_bp.route('/check-phone/<phone>', methods=['GET'])
+def check_phone(phone):
+    try:
+        student = Student.find_by_phone(phone)
+        
+        return jsonify({
+            'success': True,
+            'exists': student is not None,
+            'applicationId': student.data.get('applicationId', str(student._id)) if student else None
+        })
+        
+    except Exception as e:
+        logger.error(f'Check phone error: {str(e)}')
         return jsonify({
             'success': False,
             'message': 'Server error occurred'
