@@ -1,0 +1,22 @@
+# Copy this to .env file and fill in your actual values
+
+# MongoDB Database Configuration
+MONGODB_URI=mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/YOUR_DATABASE?retryWrites=true&w=majority&appName=YOUR_APP_NAME
+
+# Server Configuration  
+PORT=5000
+NODE_ENV=development
+
+# Application Configuration
+APP_NAME=American College of Nursing
+APP_VERSION=1.0.0
+
+# Security Configuration (add these if needed later)
+# JWT_SECRET=your_jwt_secret_here
+# SESSION_SECRET=your_session_secret_here
+
+# INSTRUCTIONS:
+# 1. Copy this file and rename it to ".env" (in the root directory)
+# 2. Replace YOUR_USERNAME, YOUR_PASSWORD, YOUR_CLUSTER, YOUR_DATABASE, YOUR_APP_NAME with actual values
+# 3. The .env file is already in .gitignore and will NOT be committed to Git
+# 4. Keep your credentials secure and never share the .env file 

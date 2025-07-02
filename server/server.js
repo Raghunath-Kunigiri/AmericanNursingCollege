@@ -6,8 +6,14 @@ require('dotenv').config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// Enhanced CORS configuration
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://your-production-domain.com'] // Add your production domain here
+    : ['http://localhost:3000'],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -19,31 +25,39 @@ global.mockStorage = {
   announcements: []
 };
 
-// MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://kunigiriraghunath9493:oIgHpKQtG6GcA4fQ@acn.oa10h.mongodb.net/AmericanCollege?retryWrites=true&w=majority&appName=ACN';
+// MongoDB connection - MUST be set in .env file
+const MONGODB_URI = process.env.MONGODB_URI;
 
-console.log('🔄 Attempting to connect to MongoDB...');
-console.log('📋 Database name:', MONGODB_URI.split('/').pop().split('?')[0]);
+if (!MONGODB_URI) {
+  console.error('❌ MONGODB_URI environment variable is not set!');
+  console.error('Please create a .env file with your MongoDB connection string.');
+  console.error('See environment-template.txt for the required format.');
+  process.exit(1);
+}
 
-mongoose.connect(MONGODB_URI, {
-  serverSelectionTimeoutMS: 10000, // 10 seconds
-  socketTimeoutMS: 45000, // 45 seconds
-  maxPoolSize: 10, // Maintain up to 10 socket connections
-})
-.then(() => {
-  console.log('✅ Successfully connected to MongoDB Atlas');
-  console.log('📊 Database:', mongoose.connection.name);
-  console.log('🌐 Host:', mongoose.connection.host);
-})
-.catch((error) => {
-  console.error('❌ MongoDB connection error:', error.message);
-  console.error('🔍 Error details:', error);
-  console.log('💡 Please check:');
-  console.log('   - Internet connection');
-  console.log('   - MongoDB Atlas cluster status');
-  console.log('   - IP whitelist settings in MongoDB Atlas');
-  console.log('   - Username and password credentials');
-});
+const connectDB = async () => {
+  try {
+    console.log('🔄 Connecting to MongoDB...');
+    await mongoose.connect(MONGODB_URI);
+    console.log('✅ MongoDB connected successfully');
+    console.log('📊 Database:', mongoose.connection.db.databaseName);
+  } catch (error) {
+    console.error('❌ MongoDB connection failed:');
+    console.error('   - Error:', error.message);
+    console.error('   - Please check your connection string in .env file');
+    console.error('   - Ensure your IP is whitelisted in MongoDB Atlas');
+    
+    // Don't exit in development, allow fallback to mock storage
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1);
+    } else {
+      console.log('🔄 Continuing with mock storage for development...');
+    }
+  }
+};
+
+// Initialize database connection
+connectDB();
 
 // Import routes
 const applicationRoutes = require('./routes/applications');
@@ -59,10 +73,12 @@ app.use('/api/announcements', announcementRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'American Nursing College API is running',
-    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
+  const dbStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
+  res.json({
+    status: 'Server running',
+    database: dbStatus,
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -70,8 +86,8 @@ app.get('/api/health', (req, res) => {
 app.use((error, req, res, next) => {
   console.error('Server Error:', error);
   res.status(500).json({ 
-    error: 'Internal Server Error',
-    message: error.message 
+    error: 'Internal server error',
+    message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
   });
 });
 
@@ -84,9 +100,15 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🌐 API endpoints available at http://localhost:${PORT}/api`);
+  console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`📡 Health check: http://localhost:${PORT}/api/health`);
 }); 

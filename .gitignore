@@ -56,7 +56,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
-Admin.js   
+
 # Coverage directory used by tools like istanbul
 coverage/
 
@@ -90,5 +90,17 @@ jspm_packages/
 .redhat/
 .n8n/
 .trae/
-.trae-aicc/ 
-src/Admin.js
+.trae-aicc/
+
+# Security - Never commit these!
+.env*
+!environment-template.txt
+secrets/
+private-keys/
+*.pem
+*.key
+
+# Database backups
+*.sql
+*.dump
+*.backup
