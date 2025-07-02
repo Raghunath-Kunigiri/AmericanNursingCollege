@@ -45,6 +45,30 @@ import "./Admin.css";
 // Make createSampleData available globally for testing
 window.createSampleData = createSampleData;
 
+// Safe date formatting function
+const safeFormatDate = (dateValue, formatString = 'MMM d, yyyy') => {
+  if (!dateValue) return 'N/A';
+  
+  try {
+    const date = new Date(dateValue);
+    if (isNaN(date.getTime())) return 'Invalid Date';
+    return format(date, formatString);
+  } catch (error) {
+    console.error('Date formatting error:', error);
+    return 'Invalid Date';
+  }
+};
+
+// Safe date accessor function
+const getCreatedDate = (item) => {
+  return item.createdAt || item.created_date || item.updatedAt || item.updated_date;
+};
+
+// Safe ID accessor function
+const getId = (item) => {
+  return item._id || item.id;
+};
+
 export default function Admin() {
   const [applications, setApplications] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -78,8 +102,8 @@ export default function Admin() {
   const loadData = async () => {
     try {
       const [applicationsData, contactsData] = await Promise.all([
-        Application.list('-created_date'),
-        Contact.list('-created_date')
+        Application.list({ sort: '-createdAt' }),
+        Contact.list({ sort: '-createdAt' })
       ]);
       setApplications(applicationsData);
       setContacts(contactsData);
@@ -146,10 +170,10 @@ export default function Admin() {
       if (filters.searchTerm) {
         const searchLower = filters.searchTerm.toLowerCase();
         const matchesSearch = 
-          app.full_name.toLowerCase().includes(searchLower) ||
-          app.email.toLowerCase().includes(searchLower) ||
-          app.application_id.toLowerCase().includes(searchLower) ||
-          getProgramName(app.program).toLowerCase().includes(searchLower);
+          (app.full_name?.toLowerCase() || '').includes(searchLower) ||
+          (app.email?.toLowerCase() || '').includes(searchLower) ||
+          (app.application_id?.toLowerCase() || '').includes(searchLower) ||
+          (getProgramName(app.program)?.toLowerCase() || '').includes(searchLower);
         
         if (!matchesSearch) return false;
       }
@@ -166,7 +190,9 @@ export default function Admin() {
 
       // Date range filter
       if (filters.dateFrom || filters.dateTo) {
-        const appDate = new Date(app.created_date);
+        const appDate = new Date(getCreatedDate(app));
+        if (isNaN(appDate.getTime())) return true; // Skip filtering if date is invalid
+        
         if (filters.dateFrom) {
           const fromDate = new Date(filters.dateFrom);
           if (appDate < fromDate) return false;
@@ -186,9 +212,9 @@ export default function Admin() {
   const filteredApplicationsEnhanced = applyAdvancedFilters(applications, filters);
 
   const filteredContacts = contacts.filter(contact => {
-    const matchesSearch = contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         contact.message.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (contact.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                         (contact.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                         (contact.message?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || contact.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -247,7 +273,7 @@ export default function Admin() {
 
   const handleSelectAll = (checked) => {
     if (checked) {
-      setSelectedApplications(new Set(filteredApplicationsEnhanced.map(app => app.id)));
+      setSelectedApplications(new Set(filteredApplicationsEnhanced.map(app => getId(app))));
     } else {
       setSelectedApplications(new Set());
     }
@@ -267,7 +293,7 @@ export default function Admin() {
   };
 
   const handleBulkExport = () => {
-    const selectedData = applications.filter(app => selectedApplications.has(app.id));
+    const selectedData = applications.filter(app => selectedApplications.has(getId(app)));
     const csvContent = "data:text/csv;charset=utf-8," + 
       Object.keys(selectedData[0] || {}).join(",") + "\n" +
       selectedData.map(row => Object.values(row).join(",")).join("\n");
@@ -303,14 +329,14 @@ export default function Admin() {
     try {
       // Update the contact assignment (in a real app, this would be an API call)
       const updatedContacts = contacts.map(contact =>
-        contact.id === contactId
+        getId(contact) === contactId
           ? { ...contact, assigned_to: assignedTo }
           : contact
       );
       setContacts(updatedContacts);
       
       // Update selected conversation if it's the one being modified
-      if (selectedConversation?.id === contactId) {
+      if (getId(selectedConversation) === contactId) {
         setSelectedConversation({...selectedConversation, assigned_to: assignedTo});
       }
     } catch (error) {
@@ -325,7 +351,7 @@ export default function Admin() {
       
       // Update contact's last activity timestamp
       const updatedContacts = contacts.map(contact =>
-        contact.id === contactId
+        getId(contact) === contactId
           ? { ...contact, last_activity: new Date().toISOString() }
           : contact
       );
@@ -485,7 +511,7 @@ export default function Admin() {
                         ) : (
                           <div className="space-y-2">
                             {recentPendingApplications.slice(0, 3).map((app) => (
-                              <div key={app.id} className="flex items-center justify-between p-2 bg-yellow-50 rounded-lg">
+                              <div key={getId(app)} className="flex items-center justify-between p-2 bg-yellow-50 rounded-lg">
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium text-gray-900 truncate">{app.full_name}</p>
                                   <p className="text-xs text-gray-500">{getProgramName(app.program)}</p>
@@ -512,7 +538,7 @@ export default function Admin() {
                         ) : (
                           <div className="space-y-2">
                             {recentNewMessages.slice(0, 3).map((contact) => (
-                              <div key={contact.id} className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+                              <div key={getId(contact)} className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium text-gray-900 truncate">{contact.name}</p>
                                   <p className="text-xs text-gray-500 truncate">{contact.subject}</p>
@@ -599,7 +625,7 @@ export default function Admin() {
                       ) : (
                         <div className="space-y-3">
                           {activityFeed.map((activity) => (
-                            <div key={activity.id} className="flex items-start gap-3">
+                            <div key={getId(activity)} className="flex items-start gap-3">
                               <div className={`w-2 h-2 rounded-full mt-2 ${
                                 activity.type === 'application' 
                                   ? activity.action === 'accepted' 
@@ -612,7 +638,7 @@ export default function Admin() {
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm text-gray-900">{activity.message}</p>
                                 <p className="text-xs text-gray-500">
-                                  {format(new Date(activity.timestamp), 'MMM d, h:mm a')}
+                                  {safeFormatDate(getCreatedDate(activity), 'MMM d, h:mm a')}
                                 </p>
                               </div>
                             </div>
@@ -696,15 +722,15 @@ export default function Admin() {
                     {/* Table Body */}
                     <div className="divide-y divide-gray-200">
                       {filteredApplicationsEnhanced.map((application) => (
-                        <div key={application.id} className="p-4 hover:bg-gray-50 transition-colors">
+                        <div key={getId(application)} className="p-4 hover:bg-gray-50 transition-colors">
                           {/* Mobile Layout */}
                           <div className="md:hidden space-y-3">
                             <div className="flex items-start justify-between">
                               <div className="flex items-start gap-3">
                                 <input
                                   type="checkbox"
-                                  checked={selectedApplications.has(application.id)}
-                                  onChange={(e) => handleApplicationSelection(application.id, e.target.checked)}
+                                  checked={selectedApplications.has(getId(application))}
+                                  onChange={(e) => handleApplicationSelection(getId(application), e.target.checked)}
                                   className="rounded border-gray-300 mt-1"
                                 />
                                 <div>
@@ -719,7 +745,7 @@ export default function Admin() {
                             </div>
                             <div className="flex items-center justify-between">
                               <span className="text-xs text-gray-500">
-                                {format(new Date(application.created_date), 'MMM d, yyyy')}
+                                {safeFormatDate(getCreatedDate(application), 'MMM d, yyyy')}
                               </span>
                               <Button
                                 size="sm"
@@ -737,8 +763,8 @@ export default function Admin() {
                             <div className="col-span-1">
                               <input
                                 type="checkbox"
-                                checked={selectedApplications.has(application.id)}
-                                onChange={(e) => handleApplicationSelection(application.id, e.target.checked)}
+                                checked={selectedApplications.has(getId(application))}
+                                onChange={(e) => handleApplicationSelection(getId(application), e.target.checked)}
                                 className="rounded border-gray-300"
                               />
                             </div>
@@ -759,7 +785,7 @@ export default function Admin() {
                             </div>
                             <div className="col-span-2">
                               <p className="text-sm text-gray-600">
-                                {format(new Date(application.created_date), 'MMM d, yyyy')}
+                                {safeFormatDate(getCreatedDate(application), 'MMM d, yyyy')}
                               </p>
                             </div>
                             <div className="col-span-2">
@@ -867,7 +893,7 @@ export default function Admin() {
                     {/* Table Body */}
                     <div className="divide-y divide-gray-200">
                       {filteredContacts.map((contact) => (
-                        <div key={contact.id} className="p-4 hover:bg-gray-50 transition-colors">
+                        <div key={getId(contact)} className="p-4 hover:bg-gray-50 transition-colors">
                           {/* Mobile Layout */}
                           <div className="md:hidden space-y-3">
                             <div className="flex items-start justify-between">
@@ -883,7 +909,7 @@ export default function Admin() {
                             <p className="text-sm text-gray-700 line-clamp-2">{contact.message}</p>
                             <div className="flex items-center justify-between">
                               <div className="text-xs text-gray-500">
-                                {format(new Date(contact.created_date), 'MMM d, yyyy')}
+                                {safeFormatDate(getCreatedDate(contact), 'MMM d, yyyy')}
                                 {contact.assigned_to && (
                                   <span className="ml-2">• Assigned to {contact.assigned_to || 'Unassigned'}</span>
                                 )}
@@ -906,7 +932,7 @@ export default function Admin() {
                                 <p className="font-semibold text-gray-900">{contact.name}</p>
                                 <p className="text-xs text-gray-500">{contact.email}</p>
                                 <p className="text-xs text-gray-500">
-                                  {format(new Date(contact.created_date), 'MMM d, h:mm a')}
+                                  {safeFormatDate(getCreatedDate(contact), 'MMM d, h:mm a')}
                                 </p>
                               </div>
                             </div>

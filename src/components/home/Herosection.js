@@ -3,6 +3,7 @@ import { Button } from "../ui/button";
 
 import { ArrowRight, Play, Star, Users, Award } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 export default function HeroSection() {
   return (
@@ -100,6 +101,7 @@ export default function HeroSection() {
             transition={{ delay: 1, duration: 0.8 }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
+            <Link to="/admissions"> 
             <Button 
               size="lg" 
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
@@ -107,7 +109,7 @@ export default function HeroSection() {
               Apply Now
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
-            
+            </Link>
             <Button 
               variant="outline" 
               size="lg"

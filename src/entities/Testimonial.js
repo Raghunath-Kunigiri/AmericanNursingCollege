@@ -1,6 +1,8 @@
+import { testimonialsAPI } from '../utils/api';
+
 export class Testimonial {
   constructor(data = {}) {
-    this.id = data.id || Date.now().toString();
+    this.id = data._id || data.id;
     this.name = data.name || '';
     this.role = data.role || '';
     this.program = data.program || '';
@@ -8,63 +10,176 @@ export class Testimonial {
     this.image = data.image || '';
     this.rating = data.rating || 5;
     this.isActive = data.isActive !== undefined ? data.isActive : true;
-    this.created_date = data.created_date || new Date().toISOString();
-    this.updated_date = data.updated_date || new Date().toISOString();
+    this.featured = data.featured || false;
+    this.order = data.order || 0;
+    this.createdAt = data.createdAt || data.created_date;
+    this.updatedAt = data.updatedAt || data.updated_date;
   }
 
-  static getStorageKey() {
-    return 'anc_testimonials';
-  }
-
-  static async list() {
+  static async list(params = {}) {
     try {
-      const stored = localStorage.getItem(this.getStorageKey());
-      const testimonials = stored ? JSON.parse(stored) : this.getDefaultTestimonials();
-      return testimonials.map(data => new Testimonial(data));
+      const result = await testimonialsAPI.getAll(params);
+      return result.testimonials?.map(data => new Testimonial(data)) || [];
     } catch (error) {
       console.error('Error loading testimonials:', error);
-      return this.getDefaultTestimonials().map(data => new Testimonial(data));
+      return [];
+    }
+  }
+
+  static async getActive() {
+    try {
+      const testimonials = await testimonialsAPI.getActive();
+      return testimonials.map(data => new Testimonial(data));
+    } catch (error) {
+      console.error('Error loading active testimonials:', error);
+      return [];
+    }
+  }
+
+  static async getById(id) {
+    try {
+      const data = await testimonialsAPI.getById(id);
+      return new Testimonial(data);
+    } catch (error) {
+      console.error('Error fetching testimonial:', error);
+      throw error;
     }
   }
 
   static async create(data) {
-    const testimonials = await this.list();
-    const newTestimonial = new Testimonial(data);
-    testimonials.push(newTestimonial);
-    await this.saveAll(testimonials);
-    return newTestimonial;
+    try {
+      const result = await testimonialsAPI.create(data);
+      return {
+        success: true,
+        data: new Testimonial(result)
+      };
+    } catch (error) {
+      console.error('Error creating testimonial:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to create testimonial'
+      };
+    }
   }
 
   static async update(id, updates) {
-    const testimonials = await this.list();
-    const index = testimonials.findIndex(t => t.id === id);
-    if (index !== -1) {
-      testimonials[index] = new Testimonial({
-        ...testimonials[index],
-        ...updates,
-        updated_date: new Date().toISOString()
-      });
-      await this.saveAll(testimonials);
-      return testimonials[index];
+    try {
+      const result = await testimonialsAPI.update(id, updates);
+      return {
+        success: true,
+        data: new Testimonial(result)
+      };
+    } catch (error) {
+      console.error('Error updating testimonial:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to update testimonial'
+      };
     }
-    throw new Error('Testimonial not found');
+  }
+
+  static async toggle(id) {
+    try {
+      const result = await testimonialsAPI.toggle(id);
+      return {
+        success: true,
+        data: new Testimonial(result)
+      };
+    } catch (error) {
+      console.error('Error toggling testimonial:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to toggle testimonial'
+      };
+    }
+  }
+
+  static async toggleFeature(id) {
+    try {
+      const result = await testimonialsAPI.toggleFeature(id);
+      return {
+        success: true,
+        data: new Testimonial(result)
+      };
+    } catch (error) {
+      console.error('Error toggling testimonial feature:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to toggle testimonial feature'
+      };
+    }
   }
 
   static async delete(id) {
-    const testimonials = await this.list();
-    const filtered = testimonials.filter(t => t.id !== id);
-    await this.saveAll(filtered);
-    return true;
+    try {
+      await testimonialsAPI.delete(id);
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting testimonial:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to delete testimonial'
+      };
+    }
   }
 
-  static async saveAll(testimonials) {
-    localStorage.setItem(this.getStorageKey(), JSON.stringify(testimonials));
+  // Bulk operations
+  static async bulkDelete(ids) {
+    try {
+      const results = await Promise.allSettled(
+        ids.map(id => testimonialsAPI.delete(id))
+      );
+      
+      const successful = results.filter(result => result.status === 'fulfilled').length;
+      const failed = results.filter(result => result.status === 'rejected').length;
+      
+      return {
+        success: failed === 0,
+        successful,
+        failed,
+        total: ids.length
+      };
+    } catch (error) {
+      console.error('Error in bulk delete:', error);
+      return {
+        success: false,
+        error: error.message || 'Bulk delete failed'
+      };
+    }
+  }
+
+  static async bulkToggle(ids) {
+    try {
+      const results = await Promise.allSettled(
+        ids.map(id => testimonialsAPI.toggle(id))
+      );
+      
+      const successful = results.filter(result => result.status === 'fulfilled').length;
+      const failed = results.filter(result => result.status === 'rejected').length;
+      
+      return {
+        success: failed === 0,
+        successful,
+        failed,
+        total: ids.length
+      };
+    } catch (error) {
+      console.error('Error in bulk toggle:', error);
+      return {
+        success: false,
+        error: error.message || 'Bulk toggle failed'
+      };
+    }
+  }
+
+  // Utility methods
+  save() {
+    return Testimonial.update(this.id, this);
   }
 
   static getDefaultTestimonials() {
     return [
       {
-        id: '1',
         name: 'Sarah Martinez',
         role: 'Graduate',
         program: 'Bachelor of Science in Nursing',
@@ -72,10 +187,10 @@ export class Testimonial {
         image: '/images/testimonials/sarah.jpg',
         rating: 5,
         isActive: true,
-        created_date: '2024-01-15T10:00:00Z'
+        featured: true,
+        order: 1
       },
       {
-        id: '2',
         name: 'Michael Chen',
         role: 'Current Student',
         program: 'General Nursing & Midwifery',
@@ -83,10 +198,10 @@ export class Testimonial {
         image: '/images/testimonials/michael.jpg',
         rating: 5,
         isActive: true,
-        created_date: '2024-02-20T14:30:00Z'
+        featured: false,
+        order: 2
       },
       {
-        id: '3',
         name: 'Jessica Rodriguez',
         role: 'Working Professional',
         program: 'Medical Lab Technician',
@@ -94,7 +209,8 @@ export class Testimonial {
         image: '/images/testimonials/jessica.jpg',
         rating: 5,
         isActive: true,
-        created_date: '2024-03-10T09:15:00Z'
+        featured: false,
+        order: 3
       }
     ];
   }

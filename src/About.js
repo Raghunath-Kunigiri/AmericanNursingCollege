@@ -208,8 +208,8 @@ export default function About() {
                 <div className="bg-white/20 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4">
                   <Award className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">NLNAC Accredited</h3>
-                <p className="text-blue-100">National League for Nursing Accrediting Commission</p>
+                <h3 className="text-xl font-bold mb-2">INC Accredited</h3>
+                <p className="text-blue-100">Indian Nursing Council</p>
               </div>
               
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
@@ -217,7 +217,7 @@ export default function About() {
                   <Stethoscope className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-xl font-bold mb-2">State Board Approved</h3>
-                <p className="text-blue-100">Approved by State Board of Nursing</p>
+                <p className="text-blue-100">Approved by APNMC, DRNTRUHS</p>
               </div>
               
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">

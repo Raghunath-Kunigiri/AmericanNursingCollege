@@ -10,6 +10,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Label } from './ui/label';
 
+// Safe date formatting function to handle invalid dates
+const safeFormatDate = (dateValue, formatString = 'MMM d, yyyy') => {
+  try {
+    if (!dateValue) return 'Not available';
+    const date = new Date(dateValue);
+    if (isNaN(date.getTime())) return 'Invalid date';
+    return format(date, formatString);
+  } catch (error) {
+    console.warn('Date formatting error:', error);
+    return 'Invalid date';
+  }
+};
+
 export function ApplicationDetailsPanel({ application, onStatusChange, onClose }) {
   const [activeTab, setActiveTab] = useState('details');
   const [internalNote, setInternalNote] = useState('');
@@ -244,7 +257,7 @@ export function ApplicationDetailsPanel({ application, onStatusChange, onClose }
                   <Label className="text-sm font-medium text-gray-500">Application Date</Label>
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-gray-400" />
-                    <p className="text-gray-900">{format(new Date(application.created_date), 'PPP')}</p>
+                    <p className="text-gray-900">{safeFormatDate(application.created_date, 'PPP')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -274,7 +287,7 @@ export function ApplicationDetailsPanel({ application, onStatusChange, onClose }
                         </div>
                         <p className="text-sm text-gray-600">{entry.note}</p>
                         <p className="text-xs text-gray-400 mt-1">
-                          {format(new Date(entry.timestamp), 'PPp')}
+                          {safeFormatDate(entry.timestamp, 'PPp')}
                         </p>
                       </div>
                     </div>
@@ -330,7 +343,7 @@ export function ApplicationDetailsPanel({ application, onStatusChange, onClose }
                           <div className="flex items-center gap-2 text-xs text-gray-500">
                             <span>{note.admin}</span>
                             <span>•</span>
-                            <span>{format(new Date(note.timestamp), 'PPp')}</span>
+                            <span>{safeFormatDate(note.timestamp, 'PPp')}</span>
                           </div>
                         </div>
                       ))}

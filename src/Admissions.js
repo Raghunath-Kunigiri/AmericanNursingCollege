@@ -51,18 +51,45 @@ export default function Admissions() {
     setIsSubmitting(true);
 
     try {
-      const appId = `ACN${Date.now()}`;
+      // Format data to match the API schema
       const applicationData = {
-        ...formData,
-        application_id: appId,
-        gpa: formData.gpa ? parseFloat(formData.gpa) : undefined
+        full_name: formData.full_name,
+        email: formData.email,
+        phone: formData.phone,
+        program: formData.program,
+        date_of_birth: formData.date_of_birth,
+        address: formData.address,
+        emergency_contact: {
+          name: "Not provided",
+          phone: "Not provided", 
+          relationship: "Not provided"
+        },
+        education: {
+          highest_qualification: formData.education_level || "Not specified",
+          institution: formData.previous_institution || "Not specified",
+          year_completed: new Date().getFullYear(), // Default to current year
+          percentage: formData.gpa ? parseFloat(formData.gpa) : 0
+        },
+        documents: {
+          id_proof: "",
+          education_certificates: "",
+          medical_certificate: ""
+        },
+        notes: formData.motivation || ""
       };
 
-      await Application.create(applicationData);
-      setApplicationId(appId);
-      setIsSubmitted(true);
+      const result = await Application.create(applicationData);
+      
+      if (result.success) {
+        setApplicationId(result.id);
+        setIsSubmitted(true);
+      } else {
+        console.error("Application creation failed:", result.error);
+        alert("Failed to submit application: " + (result.error || "Unknown error"));
+      }
     } catch (error) {
       console.error("Error submitting application:", error);
+      alert("Failed to submit application. Please try again.");
     }
     
     setIsSubmitting(false);
@@ -127,8 +154,8 @@ export default function Admissions() {
             >
               <Card className="shadow-2xl border-0">
                 <CardHeader className="bg-blue-600 text-white rounded-t-lg">
-                  <CardTitle className="text-2xl flex items-center gap-3">
-                    <FileText className="w-6 h-6" />
+                  <CardTitle className="text-2xl flex items-center gap-3 text-white">
+                    <FileText className="w-6 h-6 text-white" />
                     Application Form
                   </CardTitle>
                 </CardHeader>
