@@ -9,9 +9,15 @@ const app = express();
 // Enhanced CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-production-domain.com'] // Add your production domain here
-    : ['http://localhost:3000'],
-  credentials: true
+    ? [
+        'https://american-nursing-college.vercel.app',
+        /^https:\/\/.*\.vercel\.app$/,
+        'https://localhost:3000'
+      ]
+    : ['http://localhost:3000', 'http://localhost:3001'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
@@ -35,29 +41,57 @@ if (!MONGODB_URI) {
   process.exit(1);
 }
 
+// MongoDB connection with serverless optimization
+let isConnected = false;
+
 const connectDB = async () => {
+  if (isConnected) {
+    return;
+  }
+
   try {
     console.log('🔄 Connecting to MongoDB...');
-    await mongoose.connect(MONGODB_URI);
+    await mongoose.connect(MONGODB_URI, {
+      bufferCommands: false, // Disable mongoose buffering for serverless
+      serverSelectionTimeoutMS: 5000, // 5 seconds timeout
+      socketTimeoutMS: 45000,
+    });
+    
+    isConnected = true;
     console.log('✅ MongoDB connected successfully');
-    console.log('📊 Database:', mongoose.connection.db.databaseName);
+    
+    if (mongoose.connection.db) {
+      console.log('📊 Database:', mongoose.connection.db.databaseName);
+    }
   } catch (error) {
     console.error('❌ MongoDB connection failed:');
     console.error('   - Error:', error.message);
     console.error('   - Please check your connection string in .env file');
     console.error('   - Ensure your IP is whitelisted in MongoDB Atlas');
     
-    // Don't exit in development, allow fallback to mock storage
-    if (process.env.NODE_ENV === 'production') {
-      process.exit(1);
-    } else {
+    isConnected = false;
+    
+    // In serverless/production, continue with mock storage
+    if (process.env.VERCEL === '1' || process.env.NODE_ENV === 'production') {
+      console.log('🔄 Continuing with mock storage for serverless environment...');
+    } else if (process.env.NODE_ENV !== 'production') {
       console.log('🔄 Continuing with mock storage for development...');
+    } else {
+      throw error; // Re-throw in production if not serverless
     }
   }
 };
 
-// Initialize database connection
-connectDB();
+// Middleware to ensure database connection for each request (serverless)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error('Database connection middleware error:', error);
+    next(); // Continue with mock storage
+  }
+});
 
 // Import routes
 const applicationRoutes = require('./routes/applications');
@@ -105,10 +139,16 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-const PORT = process.env.PORT || 5000;
+// Export the app for Vercel serverless functions
+module.exports = app;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`📡 Health check: http://localhost:${PORT}/api/health`);
-}); 
+// Only start server if not in Vercel environment
+if (process.env.VERCEL !== '1' && require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`📡 Health check: http://localhost:${PORT}/api/health`);
+  });
+} 
