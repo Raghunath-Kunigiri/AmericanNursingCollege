@@ -7,6 +7,7 @@ import Programs from './programs.js';
 import Admissions from './Admissions.js';
 import Contact from './Contact.js';
 import About from './About.js';
+import Admin from './Admin.js';
 import './App.css';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="/programs/:programId" element={<Programs />} />
           <Route path="/admissions" element={<Admissions />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
         <Footer />
       </div>

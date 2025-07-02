@@ -8,6 +8,9 @@ export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
+  // Check if we're on admin page
+  const isAdminPage = location.pathname === '/admin';
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
@@ -40,7 +43,7 @@ export default function Navigation() {
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-white/10 backdrop-blur-sm'
+      scrolled || isAdminPage ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-white/10 backdrop-blur-sm'
     }`}>
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-20">
@@ -61,10 +64,10 @@ export default function Navigation() {
               </div>
             </div>
             <div>
-              <div className={`font-bold text-xl ${scrolled ? 'text-gray-900' : 'text-white'}`}>
+              <div className={`font-bold text-xl ${scrolled || isAdminPage ? 'text-gray-900' : 'text-white'}`}>
                 American College
               </div>
-              <div className={`text-sm ${scrolled ? 'text-blue-600' : 'text-blue-200'}`}>
+              <div className={`text-sm ${scrolled || isAdminPage ? 'text-blue-600' : 'text-blue-200'}`}>
                 of Nursing
               </div>
             </div>
@@ -84,10 +87,10 @@ export default function Navigation() {
                       to={item.path}
                       className={`flex items-center space-x-1 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                         isActive(item.path)
-                          ? scrolled
+                          ? scrolled || isAdminPage
                             ? 'bg-blue-600 text-white'
                             : 'bg-white/20 text-white'
-                          : scrolled
+                          : scrolled || isAdminPage
                           ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
                           : 'text-white/90 hover:text-white hover:bg-white/10'
                       }`}
@@ -118,10 +121,10 @@ export default function Navigation() {
                     to={item.path}
                     className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                       isActive(item.path)
-                        ? scrolled
+                        ? scrolled || isAdminPage
                           ? 'bg-blue-600 text-white'
                           : 'bg-white/20 text-white'
-                        : scrolled
+                        : scrolled || isAdminPage
                         ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
                         : 'text-white/90 hover:text-white hover:bg-white/10'
                     }`}
@@ -135,11 +138,11 @@ export default function Navigation() {
 
           {/* Contact Info */}
           <div className="hidden lg:flex items-center space-x-4">
-            <div className={`flex items-center space-x-2 ${scrolled ? 'text-gray-600' : 'text-white/90'}`}>
+            <div className={`flex items-center space-x-2 ${scrolled || isAdminPage ? 'text-gray-600' : 'text-white/90'}`}>
               <Phone className="w-4 h-4" />
               <span className="text-sm font-medium">+91 7013370612</span>
             </div>
-            <div className={`flex items-center space-x-2 ${scrolled ? 'text-gray-600' : 'text-white/90'}`}>
+            <div className={`flex items-center space-x-2 ${scrolled || isAdminPage ? 'text-gray-600' : 'text-white/90'}`}>
               <Mail className="w-4 h-4" />
               <span className="text-sm font-medium">Schoolofnursing10@gmail.com</span>
             </div>
@@ -149,7 +152,7 @@ export default function Navigation() {
           <button
             onClick={() => setIsOpen(!isOpen)}
             className={`md:hidden p-2 rounded-lg ${
-              scrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+              scrolled || isAdminPage ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
             }`}
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 
 import { Button } from "../ui/button";
-import { Clock, Users, Award, ArrowRight, Eye, FileText, X, Download } from "lucide-react";
+import { Clock, Users, Award, ArrowRight, Eye, FileText, X } from "lucide-react";
 
 const programs = [
   {
