@@ -173,10 +173,13 @@ export const announcementsAPI = {
 // Health check
 export const healthCheck = () => apiRequest('/health');
 
-export default {
+// Main API object
+const API = {
   applications: applicationsAPI,
   contacts: contactsAPI,
   testimonials: testimonialsAPI,
   announcements: announcementsAPI,
   healthCheck,
-}; 
+};
+
+export default API; 

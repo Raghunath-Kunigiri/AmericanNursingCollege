@@ -206,24 +206,27 @@ export default function Footer() {
               &copy; {currentYear} American College of Nursing. All Rights Reserved.
             </p>
             <div className="flex space-x-6">
-              <a
-                href="#"
+              <button
+                type="button"
                 className="text-gray-400 hover:text-blue-400 transition-colors duration-200 text-sm"
+                onClick={() => console.log('Privacy Policy clicked')}
               >
                 Privacy Policy
-              </a>
-              <a
-                href="#"
+              </button>
+              <button
+                type="button"
                 className="text-gray-400 hover:text-blue-400 transition-colors duration-200 text-sm"
+                onClick={() => console.log('Terms of Service clicked')}
               >
                 Terms of Service
-              </a>
-              <a
-                href="#"
+              </button>
+              <button
+                type="button"
                 className="text-gray-400 hover:text-blue-400 transition-colors duration-200 text-sm"
+                onClick={() => console.log('Sitemap clicked')}
               >
                 Sitemap
-              </a>
+              </button>
             </div>
           </div>
         </motion.div>

@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { 
-  Send, ChevronDown, User, Users, Calendar, Clock, 
-  Reply, MessageSquare, Paperclip, CheckCircle
+  Send, Calendar, Clock, Reply, MessageSquare, CheckCircle
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Label } from './ui/label';
@@ -22,11 +20,6 @@ export function ConversationView({
   const [conversation, setConversation] = useState([]);
   const [assignedTo, setAssignedTo] = useState(contact?.assigned_to || '');
 
-  useEffect(() => {
-    loadCannedResponses();
-    loadConversation();
-  }, [contact?.id]);
-
   const loadCannedResponses = () => {
     const saved = localStorage.getItem('cannedResponses');
     if (saved) {
@@ -34,7 +27,7 @@ export function ConversationView({
     }
   };
 
-  const loadConversation = () => {
+  const loadConversation = useCallback(() => {
     if (!contact?.id) return;
     
     const saved = localStorage.getItem(`conversation-${contact.id}`);
@@ -54,7 +47,12 @@ export function ConversationView({
       setConversation(initialConversation);
       localStorage.setItem(`conversation-${contact.id}`, JSON.stringify(initialConversation));
     }
-  };
+  }, [contact?.id, contact?.message, contact?.name, contact?.email, contact?.created_date]);
+
+  useEffect(() => {
+    loadCannedResponses();
+    loadConversation();
+  }, [loadConversation]);
 
   const handleCannedResponseSelect = (responseId) => {
     const response = cannedResponses.find(r => r.id === parseInt(responseId));
