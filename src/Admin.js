@@ -101,14 +101,45 @@ export default function Admin() {
 
   const loadData = async () => {
     try {
+      // Load from API
       const [applicationsData, contactsData] = await Promise.all([
         Application.list({ sort: '-createdAt' }),
         Contact.list({ sort: '-createdAt' })
       ]);
-      setApplications(applicationsData);
+      
+      // Load offline applications from localStorage
+      const offlineApplications = JSON.parse(localStorage.getItem('offline_applications') || '[]');
+      
+      // Merge API applications with offline applications
+      const allApplications = [...applicationsData, ...offlineApplications];
+      
+      // Sort by creation date (newest first)
+      allApplications.sort((a, b) => {
+        const dateA = new Date(getCreatedDate(a));
+        const dateB = new Date(getCreatedDate(b));
+        return dateB - dateA;
+      });
+      
+      setApplications(allApplications);
       setContacts(contactsData);
+      
+      // Log for debugging
+      if (offlineApplications.length > 0) {
+        console.log(`📱 Loaded ${offlineApplications.length} offline applications`);
+        console.log(`📊 Total applications: ${allApplications.length} (${applicationsData.length} from API + ${offlineApplications.length} offline)`);
+      }
+      
     } catch (error) {
       console.error("Error loading data:", error);
+      
+      // Fallback: If API fails completely, only show offline applications
+      const offlineApplications = JSON.parse(localStorage.getItem('offline_applications') || '[]');
+      setApplications(offlineApplications);
+      setContacts([]);
+      
+      if (offlineApplications.length > 0) {
+        console.log(`📱 API failed, showing ${offlineApplications.length} offline applications only`);
+      }
     }
     setLoading(false);
   };
@@ -346,19 +377,62 @@ export default function Admin() {
 
   const handleSendReply = async (contactId, reply) => {
     try {
-      // In a real app, this would save the reply to the backend
-      console.log('Reply sent:', { contactId, reply });
-      
-      // Update contact's last activity timestamp
-      const updatedContacts = contacts.map(contact =>
-        getId(contact) === contactId
-          ? { ...contact, last_activity: new Date().toISOString() }
-          : contact
-      );
-      setContacts(updatedContacts);
+      await Contact.reply(contactId, reply.content, reply.sender);
+      await loadData(); // Refresh data after sending reply
     } catch (error) {
       console.error("Error sending reply:", error);
     }
+  };
+
+  // Sync offline applications with server
+  const syncOfflineApplications = async () => {
+    try {
+      const offlineApplications = JSON.parse(localStorage.getItem('offline_applications') || '[]');
+      
+      if (offlineApplications.length === 0) {
+        alert('No offline applications to sync.');
+        return;
+      }
+
+      const results = await Promise.allSettled(
+        offlineApplications.map(async (app) => {
+          // Remove temporary ID and sync data
+          const { id, ...appData } = app;
+          const result = await Application.create(appData);
+          if (!result.success) {
+            throw new Error(result.error || 'Failed to sync application');
+          }
+          return result;
+        })
+      );
+
+      const successful = results.filter(result => result.status === 'fulfilled').length;
+      const failed = results.filter(result => result.status === 'rejected').length;
+
+      if (successful > 0) {
+        // Clear successfully synced applications
+        localStorage.removeItem('offline_applications');
+        await loadData(); // Refresh the admin panel
+        
+        alert(`✅ Successfully synced ${successful} applications!${failed > 0 ? ` (${failed} failed)` : ''}`);
+      } else {
+        alert(`❌ Failed to sync applications. Please check server connection.`);
+      }
+
+    } catch (error) {
+      console.error('Error syncing offline applications:', error);
+      alert('Error syncing applications: ' + error.message);
+    }
+  };
+
+  // Check if there are offline applications
+  const offlineCount = JSON.parse(localStorage.getItem('offline_applications') || '[]').length;
+
+  // Helper function to clear broken offline applications
+  const clearOfflineApplications = () => {
+    localStorage.removeItem('offline_applications');
+    loadData(); // Refresh the admin panel
+    alert('✅ Offline applications cleared successfully!');
   };
 
   if (loading) {
@@ -667,8 +741,35 @@ export default function Admin() {
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="w-5 h-5" />
                     Applications ({filteredApplicationsEnhanced.length})
+                    {offlineCount > 0 && (
+                      <Badge className="bg-orange-100 text-orange-800 text-xs ml-2">
+                        {offlineCount} offline
+                      </Badge>
+                    )}
                   </CardTitle>
                   <div className="flex items-center gap-2">
+                    {offlineCount > 0 && (
+                      <>
+                        <Button 
+                          onClick={syncOfflineApplications}
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2"
+                        >
+                          <RefreshCw className="w-4 h-4" />
+                          Sync Offline ({offlineCount})
+                        </Button>
+                        <Button 
+                          onClick={clearOfflineApplications}
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2 text-red-600 hover:text-red-700"
+                        >
+                          <XCircle className="w-4 h-4" />
+                          Clear Offline
+                        </Button>
+                      </>
+                    )}
                     <input
                       type="checkbox"
                       checked={selectedApplications.size === filteredApplicationsEnhanced.length && filteredApplicationsEnhanced.length > 0}
@@ -772,7 +873,14 @@ export default function Admin() {
                               <div>
                                 <p className="font-semibold text-gray-900">{application.full_name}</p>
                                 <p className="text-xs text-gray-500">{application.email}</p>
-                                <p className="text-xs text-gray-500">ID: {application.application_id}</p>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-xs text-gray-500">ID: {application.application_id || application.id}</p>
+                                  {!application._id && application.id && (
+                                    <Badge className="bg-orange-100 text-orange-800 text-xs">
+                                      📱 Offline
+                                    </Badge>
+                                  )}
+                                </div>
                               </div>
                             </div>
                             <div className="col-span-2">

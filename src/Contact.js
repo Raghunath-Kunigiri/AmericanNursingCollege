@@ -77,7 +77,7 @@ export default function ContactPage() {
               transition={{ duration: 0.8 }}
             >
               <Card className="shadow-2xl border-0">
-                <CardHeader className="bg-blue-600 text-white rounded-t-lg">
+                <CardHeader className="bg-white text-gray-900 rounded-t-lg border-b">
                   <CardTitle className="text-2xl flex items-center gap-3">
                     <Send className="w-6 h-6" />
                     Send us a Message
@@ -208,20 +208,20 @@ export default function ContactPage() {
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-2">Main Campus</h4>
                       <p className="text-gray-600">
-                        123 Healthcare Drive<br />
-                        Medical City, MC 12345<br />
-                        United States
+                      Balaji villas , Kalyana Durgam ROAD,<br />
+                      Anantapur, Andhra Pradesh 515004<br />
+                      India
                       </p>
                     </div>
 
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <Phone className="w-4 h-4 text-green-600" />
-                        <span className="text-sm">+1 (555) 123-4567</span>
+                        <span className="text-sm">+91 9989953273</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <Mail className="w-4 h-4 text-green-600" />
-                        <span className="text-sm">info@americancollegeofnursing.edu</span>
+                        <span className="text-sm">Americancollegeatp@gmail.com</span>
                       </div>
                     </div>
                   </div>

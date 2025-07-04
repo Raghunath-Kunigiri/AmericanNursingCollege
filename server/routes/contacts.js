@@ -72,6 +72,36 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/contacts/stats/summary - Get contact statistics (MOVED BEFORE /:id)
+router.get('/stats/summary', async (req, res) => {
+  try {
+    const stats = await Contact.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const summary = {
+      total: 0,
+      new: 0,
+      in_progress: 0,
+      resolved: 0
+    };
+
+    stats.forEach(stat => {
+      summary[stat._id] = stat.count;
+      summary.total += stat.count;
+    });
+
+    res.json(summary);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // GET /api/contacts/:id - Get single contact
 router.get('/:id', async (req, res) => {
   try {
@@ -88,10 +118,48 @@ router.get('/:id', async (req, res) => {
 // POST /api/contacts - Create new contact
 router.post('/', async (req, res) => {
   try {
+    // Check if MongoDB is connected
+    if (mongoose.connection.readyState !== 1) {
+      // Create and store mock contact when database is not connected
+      const mockContact = {
+        _id: Date.now().toString(),
+        ...req.body,
+        status: 'new',
+        conversation: [
+          {
+            message: req.body.message || req.body.inquiry,
+            sender: req.body.name,
+            is_admin_reply: false,
+            timestamp: new Date().toISOString()
+          }
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      // Store in shared mock storage
+      if (!global.mockStorage) {
+        global.mockStorage = { contacts: [] };
+      }
+      if (!global.mockStorage.contacts) {
+        global.mockStorage.contacts = [];
+      }
+      
+      global.mockStorage.contacts.push(mockContact);
+      
+      console.log('📝 Mock contact created and stored (DB not connected):', mockContact.name);
+      console.log('📊 Total mock contacts:', global.mockStorage.contacts.length);
+      
+      return res.status(201).json(mockContact);
+    }
+
     const contact = new Contact(req.body);
     await contact.save();
+    
+    console.log('✅ Contact created in MongoDB:', contact.name);
     res.status(201).json(contact);
   } catch (error) {
+    console.error('❌ Contact creation error:', error);
     res.status(400).json({ error: error.message });
   }
 });
@@ -206,34 +274,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// GET /api/contacts/stats/summary - Get contact statistics
-router.get('/stats/summary', async (req, res) => {
-  try {
-    const stats = await Contact.aggregate([
-      {
-        $group: {
-          _id: '$status',
-          count: { $sum: 1 }
-        }
-      }
-    ]);
-
-    const summary = {
-      total: 0,
-      new: 0,
-      in_progress: 0,
-      resolved: 0
-    };
-
-    stats.forEach(stat => {
-      summary[stat._id] = stat.count;
-      summary.total += stat.count;
-    });
-
-    res.json(summary);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-module.exports = router; 
+module.exports = router;

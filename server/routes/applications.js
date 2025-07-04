@@ -55,6 +55,37 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/applications/stats/summary - Get application statistics (MOVED BEFORE /:id)
+router.get('/stats/summary', async (req, res) => {
+  try {
+    const stats = await Application.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const summary = {
+      total: 0,
+      pending: 0,
+      reviewing: 0,
+      accepted: 0,
+      rejected: 0
+    };
+
+    stats.forEach(stat => {
+      summary[stat._id] = stat.count;
+      summary.total += stat.count;
+    });
+
+    res.json(summary);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // GET /api/applications/:id - Get single application
 router.get('/:id', async (req, res) => {
   try {
@@ -199,35 +230,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// GET /api/applications/stats/summary - Get application statistics
-router.get('/stats/summary', async (req, res) => {
-  try {
-    const stats = await Application.aggregate([
-      {
-        $group: {
-          _id: '$status',
-          count: { $sum: 1 }
-        }
-      }
-    ]);
-
-    const summary = {
-      total: 0,
-      pending: 0,
-      reviewing: 0,
-      accepted: 0,
-      rejected: 0
-    };
-
-    stats.forEach(stat => {
-      summary[stat._id] = stat.count;
-      summary.total += stat.count;
-    });
-
-    res.json(summary);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-module.exports = router; 
+module.exports = router;

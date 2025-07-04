@@ -104,3 +104,4 @@ private-keys/
 *.sql
 *.dump
 *.backup
+.vercel

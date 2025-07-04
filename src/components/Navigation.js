@@ -165,7 +165,7 @@ export default function Navigation() {
             </div>
             <div className={`flex items-center space-x-2 ${scrolled || isAdminPage ? 'text-gray-600' : 'text-white/90'}`}>
               <Mail className="w-4 h-4" />
-              <span className="text-sm font-medium">Schoolofnursing10@gmail.com</span>
+              <span className="text-sm font-medium">Americancollegeatp@gmail.com</span>
             </div>
           </div>
 
@@ -251,7 +251,7 @@ export default function Navigation() {
                 </div>
                 <div className="flex items-center space-x-2 text-gray-600">
                   <Mail className="w-4 h-4" />
-                  <span className="text-sm">Schoolofnursing10@gmail.com</span>
+                  <span className="text-sm">Americancollegeatp@gmail.com</span>
                 </div>
               </div>
             </div>

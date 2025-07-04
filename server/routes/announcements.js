@@ -68,13 +68,19 @@ router.get('/active/:page', async (req, res) => {
     const filter = {
       isActive: true,
       startDate: { $lte: now },
-      $or: [
-        { endDate: null },
-        { endDate: { $gte: now } }
-      ],
-      $or: [
-        { targetPages: page },
-        { targetPages: 'all' }
+      $and: [
+        {
+          $or: [
+            { endDate: null },
+            { endDate: { $gte: now } }
+          ]
+        },
+        {
+          $or: [
+            { targetPages: page },
+            { targetPages: 'all' }
+          ]
+        }
       ]
     };
 

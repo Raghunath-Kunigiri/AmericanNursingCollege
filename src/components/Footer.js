@@ -169,11 +169,11 @@ export default function Footer() {
 
               {/* Email */}
               <a
-                href="mailto:Schoolofnursing10@gmail.com"
+                href="mailto:Americancollegeatp@gmail.com"
                 className="flex items-center space-x-3 p-3 bg-white/5 hover:bg-green-600/20 rounded-lg transition-all duration-300 group"
               >
                 <Mail className="w-5 h-5 text-green-400 group-hover:text-green-300" />
-                <span className="text-gray-300 group-hover:text-white text-sm">Schoolofnursing10@gmail.com</span>
+                <span className="text-gray-300 group-hover:text-white text-sm">Americancollegeatp@gmail.com</span>
                 <Mail className="w-4 h-4 text-gray-500 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
               </a>
 
