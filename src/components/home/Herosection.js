@@ -19,8 +19,7 @@ export default function HeroSection() {
           playsInline
         >
           <source src="/videos/Video1.mp4" type="video/mp4" />
-          {/* Fallback for when custom video is not available */}
-          <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
         </video>
       </div>
 
