@@ -5,7 +5,7 @@ import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
 import { Textarea } from '../ui/textarea';
 import { Star, Plus, Edit, Trash2, Eye, EyeOff, Save, X } from 'lucide-react';
-import { Testimonial } from '../../entities/Testimonial';
+// Entity import removed - now using Google Sheets directly
 
 const TestimonialsManager = () => {
   const [testimonials, setTestimonials] = useState([]);
@@ -29,7 +29,8 @@ const TestimonialsManager = () => {
 
   const loadTestimonials = async () => {
     try {
-      const data = await Testimonial.list();
+      // Load testimonials from localStorage (replace with your preferred storage)
+      const data = JSON.parse(localStorage.getItem('testimonials') || '[]');
       setTestimonials(data);
     } catch (error) {
       console.error('Error loading testimonials:', error);
@@ -67,10 +68,25 @@ const TestimonialsManager = () => {
 
   const handleSave = async () => {
     try {
+      // Save testimonial to localStorage
+      const savedTestimonials = JSON.parse(localStorage.getItem('testimonials') || '[]');
+      
       if (editingTestimonial) {
-        await Testimonial.update(editingTestimonial.id, formData);
+        // Update existing testimonial
+        const updatedTestimonials = savedTestimonials.map(test => 
+          test.id === editingTestimonial.id ? { ...test, ...formData } : test
+        );
+        localStorage.setItem('testimonials', JSON.stringify(updatedTestimonials));
       } else {
-        await Testimonial.create(formData);
+        // Create new testimonial
+        const newTestimonial = {
+          ...formData,
+          id: `TEST${Date.now()}`,
+          created_date: new Date().toISOString(),
+          isActive: true
+        };
+        savedTestimonials.push(newTestimonial);
+        localStorage.setItem('testimonials', JSON.stringify(savedTestimonials));
       }
       await loadTestimonials();
       setIsEditing(false);
@@ -83,7 +99,10 @@ const TestimonialsManager = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this testimonial?')) {
       try {
-        await Testimonial.delete(id);
+        // Delete testimonial from localStorage
+        const savedTestimonials = JSON.parse(localStorage.getItem('testimonials') || '[]');
+        const updatedTestimonials = savedTestimonials.filter(test => test.id !== id);
+        localStorage.setItem('testimonials', JSON.stringify(updatedTestimonials));
         await loadTestimonials();
       } catch (error) {
         console.error('Error deleting testimonial:', error);
@@ -93,7 +112,12 @@ const TestimonialsManager = () => {
 
   const handleToggleActive = async (testimonial) => {
     try {
-      await Testimonial.update(testimonial.id, { isActive: !testimonial.isActive });
+      // Toggle testimonial status in localStorage
+      const savedTestimonials = JSON.parse(localStorage.getItem('testimonials') || '[]');
+      const updatedTestimonials = savedTestimonials.map(test => 
+        test.id === testimonial.id ? { ...test, isActive: !testimonial.isActive } : test
+      );
+      localStorage.setItem('testimonials', JSON.stringify(updatedTestimonials));
       await loadTestimonials();
     } catch (error) {
       console.error('Error toggling testimonial:', error);

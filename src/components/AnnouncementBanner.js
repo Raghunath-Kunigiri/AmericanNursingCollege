@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, AlertCircle, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
-import { Announcement } from '../entities/Announcement';
+// Entity import removed - now using Google Sheets directly
 
 const AnnouncementBanner = ({ targetPage = 'homepage' }) => {
   const [announcements, setAnnouncements] = useState([]);
@@ -12,7 +12,10 @@ const AnnouncementBanner = ({ targetPage = 'homepage' }) => {
 
   const loadActiveAnnouncements = async () => {
     try {
-      const active = await Announcement.getActive();
+      // Load active announcements from localStorage
+      const allAnnouncements = JSON.parse(localStorage.getItem('announcements') || '[]');
+      const active = allAnnouncements.filter(announcement => announcement.isActive);
+      
       // Filter announcements for the current page
       const filtered = active.filter(announcement => 
         announcement.targetPages.includes(targetPage) || 

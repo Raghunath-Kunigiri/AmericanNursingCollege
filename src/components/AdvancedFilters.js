@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent } from './ui/card';
+import { Select } from './ui/select';
 
 export function AdvancedFilters({ 
   onFiltersChange, 
@@ -73,32 +74,37 @@ export function AdvancedFilters({
             </div>
 
             {/* Status Filter */}
-            <select 
-              value={filters.status} 
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md bg-white min-w-32"
-            >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="reviewing">Reviewing</option>
-              <option value="accepted">Accepted</option>
-              <option value="rejected">Rejected</option>
-            </select>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Status</label>
+              <select
+                value={filters.status}
+                onChange={(e) => handleFilterChange('status', e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              >
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="reviewing">Reviewing</option>
+                <option value="accepted">Accepted</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
 
             {/* Program Filter */}
-            <select 
-              value={filters.program} 
-              onChange={(e) => handleFilterChange('program', e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md bg-white min-w-40"
-            >
-              <option value="all">All Programs</option>
-              <option value="bachelor_nursing">BSN</option>
-              <option value="general_nursing_midwifery">GNM</option>
-              <option value="medical_lab_technician">MLT</option>
-              <option value="cardiology_technician">Cardiology Tech</option>
-              <option value="paramedical_nursing">Paramedical Nursing</option>
-              <option value="multipurpose_health_assistant">Multipurpose Health Assistant</option>
-            </select>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Program</label>
+              <select
+                value={filters.program}
+                onChange={(e) => handleFilterChange('program', e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              >
+                <option value="all">All Programs</option>
+                <option value="BSN">Bachelor of Science in Nursing</option>
+                <option value="GNM">General Nursing and Midwifery</option>
+                <option value="Paramedical">Paramedical in Nursing</option>
+                <option value="MLT">Medical Lab Technician</option>
+                <option value="CT">Cardiology Technician</option>
+              </select>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -135,29 +141,23 @@ export function AdvancedFilters({
         {/* Advanced Filters (Date Range) */}
         {isExpanded && (
           <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="date-from" className="text-sm font-medium">
-                  Application Date From
-                </Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">From Date</label>
                 <Input
-                  id="date-from"
                   type="date"
                   value={filters.dateFrom}
                   onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-                  className="w-full"
+                  className="mt-1"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="date-to" className="text-sm font-medium">
-                  Application Date To
-                </Label>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">To Date</label>
                 <Input
-                  id="date-to"
                   type="date"
                   value={filters.dateTo}
                   onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-                  className="w-full"
+                  className="mt-1"
                 />
               </div>
             </div>

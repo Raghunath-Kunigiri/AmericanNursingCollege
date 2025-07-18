@@ -2,36 +2,32 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
+import Home from './home';
+import About from './About';
+import Programs from './programs';
+import Contact from './Contact';
+import Admissions from './Admissions';
+import Admin from './Admin';
 import ScrollToTop from './components/ScrollToTop';
-import Home from './home.js';
-import Programs from './programs.js';
-import Admissions from './Admissions.js';
-import Contact from './Contact.js';
-import About from './About.js';
-import Admin from './Admin.js';
 import './App.css';
 
 function App() {
   return (
-    <Router
-      future={{
-        v7_startTransition: true,
-        v7_relativeSplatPath: true
-      }}
-    >
+    <Router>
       <ScrollToTop />
-      <div className="App">
+      <div className="flex flex-col min-h-screen">
         <Navigation />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/programs" element={<Programs />} />
-          <Route path="/programs/:programId" element={<Programs />} />
-          <Route path="/admissions" element={<Admissions />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/admin" element={<Admin />} />
-        </Routes>
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/programs" element={<Programs />} />
+            <Route path="/programs/:programId" element={<Programs />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/admissions" element={<Admissions />} />
+            <Route path="/admin/*" element={<Admin />} />
+          </Routes>
+        </main>
         <Footer />
       </div>
     </Router>

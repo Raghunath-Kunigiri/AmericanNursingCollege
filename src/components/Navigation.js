@@ -8,8 +8,10 @@ export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
-  // Check if we're on admin page
+  // Check if we're on admin page or contact page (both need solid navbar)
   const isAdminPage = location.pathname === '/admin';
+  const isContactPage = location.pathname === '/contact';
+  const needsSolidNavbar = isAdminPage || isContactPage;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -43,7 +45,7 @@ export default function Navigation() {
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled || isAdminPage ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-white/10 backdrop-blur-sm'
+      scrolled || needsSolidNavbar ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-white/10 backdrop-blur-sm'
     }`}>
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-20">
@@ -64,10 +66,10 @@ export default function Navigation() {
               </div>
             </div>
             <div>
-              <div className={`font-bold text-xl ${scrolled || isAdminPage ? 'text-gray-900' : 'text-white'}`}>
+              <div className={`font-bold text-xl ${scrolled || needsSolidNavbar ? 'text-gray-900' : 'text-white'}`}>
                 American College
               </div>
-              <div className={`text-sm ${scrolled || isAdminPage ? 'text-blue-600' : 'text-blue-200'}`}>
+              <div className={`text-sm ${scrolled || needsSolidNavbar ? 'text-blue-600' : 'text-blue-200'}`}>
                 of Nursing
               </div>
             </div>
@@ -87,10 +89,10 @@ export default function Navigation() {
                       to={item.path}
                       className={`flex items-center space-x-1 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                         isActive(item.path)
-                          ? scrolled || isAdminPage
+                          ? scrolled || needsSolidNavbar
                             ? 'bg-blue-600 text-white'
                             : 'bg-white/20 text-white'
-                          : scrolled || isAdminPage
+                          : scrolled || needsSolidNavbar
                           ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
                           : 'text-white/90 hover:text-white hover:bg-white/10'
                       }`}
@@ -142,10 +144,10 @@ export default function Navigation() {
                     to={item.path}
                     className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                       isActive(item.path)
-                        ? scrolled || isAdminPage
+                        ? scrolled || needsSolidNavbar
                           ? 'bg-blue-600 text-white'
                           : 'bg-white/20 text-white'
-                        : scrolled || isAdminPage
+                        : scrolled || needsSolidNavbar
                         ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
                         : 'text-white/90 hover:text-white hover:bg-white/10'
                     }`}
@@ -158,22 +160,55 @@ export default function Navigation() {
           </div>
 
           {/* Contact Info */}
-          <div className="hidden lg:flex items-center space-x-4">
-            <div className={`flex items-center space-x-2 ${scrolled || isAdminPage ? 'text-gray-600' : 'text-white/90'}`}>
+          <div className="hidden xl:flex items-center space-x-2">
+            <a 
+              href="tel:+919989953273" 
+              className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md transition-all duration-200 ${
+                scrolled || needsSolidNavbar 
+                  ? 'text-gray-600 hover:text-green-600 hover:bg-green-50' 
+                  : 'text-white/90 hover:text-white hover:bg-white/10'
+              }`}
+              title="Call us: +91 9989953273"
+            >
+              <Phone className="w-4 h-4 flex-shrink-0" />
+              <span className="text-sm font-medium whitespace-nowrap">+91 9989953273</span>
+            </a>
+            <div className="w-px h-4 bg-gray-300"></div>
+            <a 
+              href="mailto:Americancollegeatp@gmail.com" 
+              className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md transition-all duration-200 ${
+                scrolled || needsSolidNavbar 
+                  ? 'text-gray-600 hover:text-blue-600 hover:bg-blue-50' 
+                  : 'text-white/90 hover:text-white hover:bg-white/10'
+              }`}
+              title="Email: Americancollegeatp@gmail.com"
+            >
+              <Mail className="w-4 h-4 flex-shrink-0" />
+              <span className="text-sm font-medium">Email Us</span>
+            </a>
+          </div>
+
+          {/* Simplified Contact for Large screens */}
+          <div className="hidden lg:flex xl:hidden items-center">
+            <a 
+              href="tel:+919989953273" 
+              className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md transition-all duration-200 ${
+                scrolled || needsSolidNavbar 
+                  ? 'text-gray-600 hover:text-green-600 hover:bg-green-50' 
+                  : 'text-white/90 hover:text-white hover:bg-white/10'
+              }`}
+              title="Call us: +91 9989953273"
+            >
               <Phone className="w-4 h-4" />
-              <span className="text-sm font-medium">+91 7013370612</span>
-            </div>
-            <div className={`flex items-center space-x-2 ${scrolled || isAdminPage ? 'text-gray-600' : 'text-white/90'}`}>
-              <Mail className="w-4 h-4" />
-              <span className="text-sm font-medium">Americancollegeatp@gmail.com</span>
-            </div>
+              <span className="text-sm font-medium">Call</span>
+            </a>
           </div>
 
           {/* Mobile menu button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
             className={`md:hidden p-2 rounded-lg ${
-              scrolled || isAdminPage ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+              scrolled || needsSolidNavbar ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
             }`}
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -244,15 +279,25 @@ export default function Navigation() {
                   )}
                 </div>
               ))}
-              <div className="pt-4 mt-4 border-t border-gray-200">
-                <div className="flex items-center space-x-2 text-gray-600 mb-2">
+              <div className="pt-4 mt-4 border-t border-gray-200 space-y-2">
+                <a 
+                  href="tel:+919989953273" 
+                  className="flex items-center space-x-2 text-gray-600 hover:text-green-600 hover:bg-green-50 px-3 py-2 rounded-lg transition-all duration-200"
+                  title="Call us"
+                  onClick={() => setIsOpen(false)}
+                >
                   <Phone className="w-4 h-4" />
-                  <span className="text-sm">+91 7013370612</span>
-                </div>
-                <div className="flex items-center space-x-2 text-gray-600">
+                  <span className="text-sm font-medium">+91 9989953273</span>
+                </a>
+                <a 
+                  href="mailto:Americancollegeatp@gmail.com" 
+                  className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition-all duration-200"
+                  title="Send us an email"
+                  onClick={() => setIsOpen(false)}
+                >
                   <Mail className="w-4 h-4" />
-                  <span className="text-sm">Americancollegeatp@gmail.com</span>
-                </div>
+                  <span className="text-sm font-medium">Americancollegeatp@gmail.com</span>
+                </a>
               </div>
             </div>
           </div>

@@ -1,300 +1,145 @@
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
-import { Contact } from "./entities/Contact";
-import { Button } from "./components/ui/button";
-import { Input } from "./components/ui/input";
-import { Label } from "./components/ui/label";
-import { Textarea } from "./components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
-import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from "lucide-react";
+import { MapPin, Phone, Mail } from "lucide-react";
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    subject: "",
-    message: "",
-    inquiry_type: ""
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      await Contact.create(formData);
-      setIsSubmitted(true);
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
-        inquiry_type: ""
-      });
-    } catch (error) {
-      console.error("Error submitting contact form:", error);
-    }
-    
-    setIsSubmitting(false);
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 bg-blue-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 text-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-16 sm:mb-20"
+        >
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
+            Contact <span className="text-blue-600">Information</span>
+          </h1>
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Get in touch with American Nursing College - we're here to help you start your healthcare journey
+          </p>
+        </motion.div>
+
+        {/* Contact Information */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8 mb-16 sm:mb-20">
+          {/* Address */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="md:col-span-2 xl:col-span-1"
           >
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Contact Us
-            </h1>
-            <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
-              Get in touch with our admissions team. We're here to help you start your healthcare journey.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      <div className="max-w-7xl mx-auto px-4 py-20">
-        <div className="grid lg:grid-cols-3 gap-12">
-          {/* Contact Form */}
-          <div className="lg:col-span-2">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <Card className="shadow-2xl border-0">
-                <CardHeader className="bg-white text-gray-900 rounded-t-lg border-b">
-                  <CardTitle className="text-2xl flex items-center gap-3">
-                    <Send className="w-6 h-6" />
-                    Send us a Message
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-8">
-                  {isSubmitted ? (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.6 }}
-                      className="text-center py-8"
-                    >
-                      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <CheckCircle className="w-8 h-8 text-green-600" />
-                      </div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">Message Sent!</h3>
-                      <p className="text-gray-600">
-                        Thank you for contacting us. We'll get back to you within 24 hours.
-                      </p>
-                    </motion.div>
-                  ) : (
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                      <div className="grid md:grid-cols-2 gap-6">
-                        <div>
-                          <Label htmlFor="name">Full Name *</Label>
-                          <Input
-                            id="name"
-                            value={formData.name}
-                            onChange={(e) => handleInputChange('name', e.target.value)}
-                            required
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="email">Email Address *</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            value={formData.email}
-                            onChange={(e) => handleInputChange('email', e.target.value)}
-                            required
-                            className="mt-1"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid md:grid-cols-2 gap-6">
-                        <div>
-                          <Label htmlFor="phone">Phone Number</Label>
-                          <Input
-                            id="phone"
-                            value={formData.phone}
-                            onChange={(e) => handleInputChange('phone', e.target.value)}
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="inquiry_type">Inquiry Type</Label>
-                          <Select onValueChange={(value) => handleInputChange('inquiry_type', value)}>
-                            <SelectTrigger className="mt-1">
-                              <SelectValue placeholder="Select inquiry type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="admissions">Admissions</SelectItem>
-                              <SelectItem value="programs">Programs</SelectItem>
-                              <SelectItem value="facilities">Facilities</SelectItem>
-                              <SelectItem value="general">General</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="subject">Subject *</Label>
-                        <Input
-                          id="subject"
-                          value={formData.subject}
-                          onChange={(e) => handleInputChange('subject', e.target.value)}
-                          required
-                          className="mt-1"
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="message">Message *</Label>
-                        <Textarea
-                          id="message"
-                          value={formData.message}
-                          onChange={(e) => handleInputChange('message', e.target.value)}
-                          required
-                          className="mt-1"
-                          rows={6}
-                          placeholder="Please describe your inquiry or question..."
-                        />
-                      </div>
-
-                      <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full bg-blue-600 hover:bg-blue-700 py-3 text-lg font-semibold"
-                      >
-                        {isSubmitting ? "Sending..." : "Send Message"}
-                      </Button>
-                    </form>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
-
-          {/* Contact Information */}
-          <div className="space-y-8">
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-blue-600" />
-                    Visit Our Campus
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">Main Campus</h4>
-                      <p className="text-gray-600">
-                      Balaji villas , Kalyana Durgam ROAD,<br />
+            <Card className="shadow-lg h-full hover:shadow-xl transition-all duration-300 border-0">
+              <CardHeader className="text-center pb-6">
+                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MapPin className="w-10 h-10 text-blue-600" />
+                </div>
+                <CardTitle className="text-2xl text-gray-900">Our Address</CardTitle>
+              </CardHeader>
+              <CardContent className="text-center px-6 pb-8">
+                <div className="space-y-3">
+                  <p className="text-gray-700 font-semibold text-lg">Main Campus</p>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-gray-700 leading-relaxed font-medium">
+                      Balaji villas, Kalyana Durgam ROAD<br />
                       Anantapur, Andhra Pradesh 515004<br />
                       India
-                      </p>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Phone className="w-4 h-4 text-green-600" />
-                        <span className="text-sm">+91 9989953273</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Mail className="w-4 h-4 text-green-600" />
-                        <span className="text-sm">Americancollegeatp@gmail.com</span>
-                      </div>
-                    </div>
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-            >
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-blue-600" />
-                    Office Hours
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Monday - Friday</span>
-                      <span className="font-medium">9:00 AM - 5:00 PM</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Saturday</span>
-                      <span className="font-medium">10:00 AM - 2:00 PM</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Sunday</span>
-                      <span className="font-medium">Closed</span>
-                    </div>
+          {/* Phone */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            <Card className="shadow-lg h-full hover:shadow-xl transition-all duration-300 border-0">
+              <CardHeader className="text-center pb-6">
+                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Phone className="w-10 h-10 text-green-600" />
+                </div>
+                <CardTitle className="text-2xl text-gray-900">Phone Number</CardTitle>
+              </CardHeader>
+              <CardContent className="text-center px-6 pb-8">
+                <div className="space-y-3">
+                  <p className="text-gray-700 font-semibold text-lg">Call Us</p>
+                  <div className="bg-green-50 rounded-lg p-4">
+                    <a 
+                      href="tel:+919989953273" 
+                      className="text-2xl font-bold text-green-600 hover:text-green-700 transition-colors duration-200 block"
+                    >
+                      +91 9989953273
+                    </a>
+                    <p className="text-gray-600 text-sm mt-2">Available during office hours</p>
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-            >
-              <Card className="shadow-lg bg-blue-600 text-white">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-bold mb-4">Schedule a Campus Tour</h3>
-                  <p className="text-blue-100 mb-4">
-                    Experience our state-of-the-art facilities and meet our faculty in person.
-                  </p>
-                  <Button className="bg-white text-blue-600 hover:bg-gray-100 w-full">
-                    Book Your Tour
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
+          {/* Email */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            <Card className="shadow-lg h-full hover:shadow-xl transition-all duration-300 border-0">
+              <CardHeader className="text-center pb-6">
+                <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Mail className="w-10 h-10 text-purple-600" />
+                </div>
+                <CardTitle className="text-2xl text-gray-900">Email Address</CardTitle>
+              </CardHeader>
+              <CardContent className="text-center px-6 pb-8">
+                <div className="space-y-3">
+                  <p className="text-gray-700 font-semibold text-lg">Send us an Email</p>
+                  <div className="bg-purple-50 rounded-lg p-4">
+                    <a 
+                      href="mailto:Americancollegeatp@gmail.com" 
+                      className="text-lg font-bold text-purple-600 hover:text-purple-700 transition-colors duration-200 break-all block"
+                    >
+                      Americancollegeatp@gmail.com
+                    </a>
+                    <p className="text-gray-600 text-sm mt-2">We'll respond within 24 hours</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
 
-        {/* Map Section */}
+        {/* Call-to-Action Section */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="mt-20"
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.8 }}
+          className="text-center max-w-4xl mx-auto"
         >
-          <Card className="shadow-lg overflow-hidden">
-            <CardContent className="p-0">
-              <div className="h-96 bg-gray-200 flex items-center justify-center">
-                <div className="text-center">
-                  <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500">Interactive Map</p>
-                  <p className="text-sm text-gray-400">123 Healthcare Drive, Medical City, MC 12345</p>
-                </div>
+          <Card className="shadow-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 overflow-hidden">
+            <CardContent className="py-12 px-6 sm:px-8">
+              <h3 className="text-2xl sm:text-3xl font-bold mb-4">Ready to Start Your Nursing Career?</h3>
+              <p className="text-lg sm:text-xl text-blue-100 mb-8 max-w-3xl mx-auto leading-relaxed">
+                Contact us today to learn more about our nursing programs and how we can help you achieve your healthcare career goals.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
+                <a 
+                  href="tel:+919989953273" 
+                  className="w-full sm:w-auto bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200 text-center"
+                >
+                  📞 Call Now
+                </a>
+                <a 
+                  href="mailto:Americancollegeatp@gmail.com" 
+                  className="w-full sm:w-auto bg-transparent border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors duration-200 text-center"
+                >
+                  ✉️ Send Email
+                </a>
               </div>
             </CardContent>
           </Card>

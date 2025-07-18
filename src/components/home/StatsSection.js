@@ -50,10 +50,10 @@ const stats = [
   },
   {
     icon: Heart,
-    number: 15,
-    suffix: "+",
-    label: "Specializations",
-    description: "Comprehensive programs",
+    number: 6,
+    suffix: "",
+    label: "Programs",
+    description: "Nursing specializations",
     color: "text-rose-600",
     bgColor: "bg-rose-100"
   }

@@ -5,7 +5,7 @@ import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
 import { Textarea } from '../ui/textarea';
 import { Megaphone, Plus, Edit, Trash2, Eye, EyeOff, Save, X, Calendar, AlertCircle } from 'lucide-react';
-import { Announcement } from '../../entities/Announcement';
+// Entity import removed - now using Google Sheets directly
 import { format } from 'date-fns';
 
 const AnnouncementsManager = () => {
@@ -31,7 +31,8 @@ const AnnouncementsManager = () => {
 
   const loadAnnouncements = async () => {
     try {
-      const data = await Announcement.list();
+      // Load announcements from localStorage (replace with your preferred storage)
+      const data = JSON.parse(localStorage.getItem('announcements') || '[]');
       setAnnouncements(data);
     } catch (error) {
       console.error('Error loading announcements:', error);
@@ -77,10 +78,25 @@ const AnnouncementsManager = () => {
         endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null
       };
 
+      // Save announcement to localStorage
+      const savedAnnouncements = JSON.parse(localStorage.getItem('announcements') || '[]');
+      
       if (editingAnnouncement) {
-        await Announcement.update(editingAnnouncement.id, saveData);
+        // Update existing announcement
+        const updatedAnnouncements = savedAnnouncements.map(ann => 
+          ann.id === editingAnnouncement.id ? { ...ann, ...saveData } : ann
+        );
+        localStorage.setItem('announcements', JSON.stringify(updatedAnnouncements));
       } else {
-        await Announcement.create(saveData);
+        // Create new announcement
+        const newAnnouncement = {
+          ...saveData,
+          id: `ANN${Date.now()}`,
+          created_date: new Date().toISOString(),
+          status: 'active'
+        };
+        savedAnnouncements.push(newAnnouncement);
+        localStorage.setItem('announcements', JSON.stringify(savedAnnouncements));
       }
       await loadAnnouncements();
       setIsEditing(false);
@@ -93,7 +109,10 @@ const AnnouncementsManager = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this announcement?')) {
       try {
-        await Announcement.delete(id);
+        // Delete announcement from localStorage
+        const savedAnnouncements = JSON.parse(localStorage.getItem('announcements') || '[]');
+        const updatedAnnouncements = savedAnnouncements.filter(ann => ann.id !== id);
+        localStorage.setItem('announcements', JSON.stringify(updatedAnnouncements));
         await loadAnnouncements();
       } catch (error) {
         console.error('Error deleting announcement:', error);
@@ -103,11 +122,12 @@ const AnnouncementsManager = () => {
 
   const handleToggleActive = async (announcement) => {
     try {
-      if (announcement.isActive) {
-        await Announcement.deactivate(announcement.id);
-      } else {
-        await Announcement.activate(announcement.id);
-      }
+      // Toggle announcement status in localStorage
+      const savedAnnouncements = JSON.parse(localStorage.getItem('announcements') || '[]');
+      const updatedAnnouncements = savedAnnouncements.map(ann => 
+        ann.id === announcement.id ? { ...ann, isActive: !announcement.isActive } : ann
+      );
+      localStorage.setItem('announcements', JSON.stringify(updatedAnnouncements));
       await loadAnnouncements();
     } catch (error) {
       console.error('Error toggling announcement:', error);

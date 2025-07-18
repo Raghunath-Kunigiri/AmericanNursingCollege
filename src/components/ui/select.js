@@ -1,29 +1,20 @@
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
-export function Select({ onValueChange, children, ...props }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState('');
-
-  const handleSelect = (value, label) => {
-    setSelectedValue(label);
-    setIsOpen(false);
-    if (onValueChange) onValueChange(value);
-  };
-
+export const Select = React.forwardRef(({ className = '', children, ...props }, ref) => {
   return (
-    <div className="relative" {...props}>
-      {React.Children.map(children, child => 
-        React.cloneElement(child, { 
-          isOpen, 
-          setIsOpen, 
-          selectedValue, 
-          handleSelect 
-        })
-      )}
-    </div>
+    <select
+      className={`block w-full rounded-md border-gray-300 shadow-sm 
+        focus:border-blue-500 focus:ring-blue-500 
+        disabled:cursor-not-allowed disabled:bg-gray-100
+        ${className}`}
+      ref={ref}
+      {...props}
+    >
+      {children}
+    </select>
   );
-}
+});
 
 export function SelectTrigger({ className = '', children, isOpen, setIsOpen, selectedValue }) {
   return (

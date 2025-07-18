@@ -109,14 +109,16 @@ export default function HeroSection() {
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             </Link>
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-8 py-4 text-lg font-semibold rounded-xl transition-all duration-300 group"
-            >
-              <Play className="mr-2 w-5 h-5" />
-              Explore Programs
-            </Button>
+            <Link to="/programs">
+              <Button 
+                variant="outline" 
+                size="lg"
+                className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-8 py-4 text-lg font-semibold rounded-xl transition-all duration-300 group"
+              >
+                <Play className="mr-2 w-5 h-5" />
+                Explore Programs
+              </Button>
+            </Link>
           </motion.div>
 
           {/* Accreditation Badge */}

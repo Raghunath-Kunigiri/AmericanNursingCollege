@@ -69,7 +69,7 @@ export default function About() {
                 one of the most respected nursing colleges in the region.
               </p>
               <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                Our journey began with just 30 students and 5 faculty members. Today, we proudly serve over 500 students 
+                Our journey began with just 30 students and 5 faculty members. Today, we proudly serve over 300 students 
                 with a team of 25+ expert faculty members, all while maintaining our commitment to personalized education 
                 and exceptional clinical training.
               </p>
