@@ -10,17 +10,8 @@
       "source": "/static/(.*)",
       "headers": [
         {
-          "key": "cache-control",
+          "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/(.*\\.(js|css|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot))",
-      "headers": [
-        {
-          "key": "cache-control", 
-          "value": "public, max-age=31536000"
         }
       ]
     }
