@@ -37,3 +37,9 @@ environment-example.txt
 google-apps-script.js
 setup-env.js
 start.js
+
+# Admin files (security - keep admin panel private)
+src/Admin.js
+src/components/AdminLogin.js
+src/components/admin/
+src/utils/adminUtils.js

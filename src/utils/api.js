@@ -31,10 +31,10 @@ export const api = {
   login: async (credentials) => {
     await simulateDelay();
     // Simple demo authentication
-    if (credentials.username === 'admin' && credentials.password === 'admin123') {
+    if (credentials.username === 'VSMAR' && credentials.password === 'American#99899') {
       const token = 'demo-auth-token-' + Date.now();
       localStorage.setItem('authToken', token);
-      return { success: true, token, user: { username: 'admin', role: 'administrator' } };
+      return { success: true, token, user: { username: 'VSMAR', role: 'administrator' } };
     }
     throw new Error('Invalid credentials');
   },
@@ -43,7 +43,7 @@ export const api = {
     await simulateDelay(100);
     const token = localStorage.getItem('authToken');
     if (token) {
-      return { valid: true, user: { username: 'admin', role: 'administrator' } };
+      return { valid: true, user: { username: 'VSMAR', role: 'administrator' } };
     }
     throw new Error('Invalid token');
   },

@@ -4,7 +4,6 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent } from './ui/card';
-import { Select } from './ui/select';
 
 export function AdvancedFilters({ 
   onFiltersChange, 
