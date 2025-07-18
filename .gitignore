@@ -43,3 +43,7 @@ src/Admin.js
 src/components/AdminLogin.js
 src/components/admin/
 src/utils/adminUtils.js
+
+# Testimonials/Student success stories (hidden for now)
+src/components/home/TestimonialsSection.js
+src/components/content/TestimonialsManager.js

@@ -494,7 +494,7 @@ export default function Admissions() {
           {/* Sidebar */}
           <div className="space-y-8">
             {/* Google Sheets Integration Info */}
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
@@ -514,7 +514,7 @@ export default function Admissions() {
                   ✓ Instant confirmation email
                 </p>
               </div>
-            </motion.div>
+            </motion.div> */}
 
             {/* Admission Process */}
             <motion.div
